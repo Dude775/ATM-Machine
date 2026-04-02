@@ -75,7 +75,7 @@ class ATMApp:
                  bg="#1a237e", fg="white").pack(pady=10)
 
         self.balance_label = tk.Label(self.root, text="Balance: " + str(balance),
-                                      font=("Segoe UI", 16), bg="#1a237e", fg="#4caf50")
+                 font=("Segoe UI", 16), bg="#1a237e", fg="#4caf50")
         self.balance_label.pack(pady=5)
 
         buttons = [
@@ -93,7 +93,44 @@ class ATMApp:
                       command=command).pack(pady=5)
 
     def show_deposit(self):
-        pass
+        # פותח חלון חדש להפקדה
+        self.deposit_window = tk.Toplevel(self.root)
+        self.deposit_window.title("Deposit")
+        self.deposit_window.geometry("300x200")
+        self.deposit_window.configure(bg="#1a237e")
+
+        tk.Label(self.deposit_window, text="Enter amount:", font=("Segoe UI", 12),
+                 bg="#1a237e", fg="white").pack(pady=10)
+
+        self.deposit_entry = tk.Entry(self.deposit_window, font=("Segoe UI", 14),
+                                      justify="center")
+        self.deposit_entry.pack(pady=5)
+
+        tk.Button(self.deposit_window, text="Deposit", font=("Segoe UI", 13),
+                  bg="#4caf50", fg="white", width=15,
+                  command=self.do_deposit).pack(pady=15)
+
+    def do_deposit(self):
+        text = self.deposit_entry.get()
+        if text == "":
+            messagebox.showerror("Error", "Please enter an amount")
+            return
+        # בדיקה שזה מספר
+        try:
+            amount = float(text)
+        except:
+            messagebox.showerror("Error", "Please enter a valid number")
+            return
+
+        success, message = self.current_account.deposit(amount)
+        if not success:
+            messagebox.showerror("Error", message)
+            return
+
+        save_data(self.bank)
+        self.balance_label.config(text="Balance: " + str(self.current_account.balance))
+        messagebox.showinfo("Success", message)
+        self.deposit_window.destroy()
 
     def show_withdraw(self):
         pass
