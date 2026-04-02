@@ -132,8 +132,46 @@ class ATMApp:
         messagebox.showinfo("Success", message)
         self.deposit_window.destroy()
 
+# חוזר על העקרון שעשיתי ב DEPOSIT
     def show_withdraw(self):
-        pass
+        # חלון משיכה - אותו עיקרון כמו הפקדה
+        self.withdraw_window = tk.Toplevel(self.root)
+        self.withdraw_window.title("Withdraw")
+        self.withdraw_window.geometry("300x200")
+        self.withdraw_window.configure(bg="#1a237e")
+
+        tk.Label(self.withdraw_window, text="Enter amount:", font=("Segoe UI", 12),
+                 bg="#1a237e", fg="white").pack(pady=10)
+
+        self.withdraw_entry = tk.Entry(self.withdraw_window, font=("Segoe UI", 14),
+                                       justify="center")
+        self.withdraw_entry.pack(pady=5)
+
+        tk.Button(self.withdraw_window, text="Withdraw", font=("Segoe UI", 13),
+                  bg="#f44336", fg="white", width=15,
+                  command=self.do_withdraw).pack(pady=15)
+
+    def do_withdraw(self):
+        text = self.withdraw_entry.get()
+        if text == "":
+            messagebox.showerror("Error", "Please enter an amount")
+            return
+        try:
+            amount = float(text)
+        except:
+            messagebox.showerror("Error", "Please enter a valid number")
+            return
+
+        success, message = self.current_account.withdraw(amount)
+        if not success:
+            messagebox.showerror("Error", message)
+            return
+
+        save_data(self.bank)
+        self.balance_label.config(text="Balance: " + str(self.current_account.balance))
+        messagebox.showinfo("Success", message)
+        self.withdraw_window.destroy()
+
 
     def show_transfer(self):
         pass
