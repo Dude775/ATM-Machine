@@ -7,29 +7,35 @@ class ATMApp:
     def __init__(self, root, bank):
         self.root = root
         self.bank = bank
-        self.current_account = None
+        self.current_account = None  # מי שמחובר עכשיו - בהתחלה אף אחד
 
         self.root.title("ATM Machine")
         self.root.geometry("400x500")
         self.root.configure(bg="#1a237e")
 
+        # מסך ראשון שנטען כשפותחים את התוכנה
         self.show_login_screen()
 
+    # מוחק את כל מה שעל המסך - משתמשים בזה לפני כל מעבר מסך
     def clear_screen(self):
         for widget in self.root.winfo_children():
             widget.destroy()
 
+    # -------- מסך כניסה --------
     def show_login_screen(self):
         self.clear_screen()
+        self.current_account = None  # מנקה את המשתמש המחובר
 
         tk.Label(self.root, text="ATM Machine", font=("Segoe UI", 24, "bold"),
                  bg="#1a237e", fg="white").pack(pady=30)
 
+        # שדה מספר חשבון
         tk.Label(self.root, text="Account Number:", font=("Segoe UI", 12),
                  bg="#1a237e", fg="white").pack(pady=5)
         self.acc_entry = tk.Entry(self.root, font=("Segoe UI", 14), justify="center")
         self.acc_entry.pack(pady=5)
 
+        # שדה PIN - מוסתר עם כוכביות
         tk.Label(self.root, text="PIN:", font=("Segoe UI", 12),
                  bg="#1a237e", fg="white").pack(pady=5)
         self.pin_entry = tk.Entry(self.root, font=("Segoe UI", 14), justify="center", show="*")
@@ -43,10 +49,12 @@ class ATMApp:
                   bg="#f44336", fg="white", width=15,
                   command=self.handle_admin_login).pack(pady=5)
 
+    # בודק את הפרטים שהוזנו ומחליט אם להכניס או לא
     def handle_login(self):
         acc_number = self.acc_entry.get()
         pin = self.pin_entry.get()
 
+        # NOTE: סדר הבדיקות חשוב - קודם בודקים אם קיים, אחכ אם חסום, אחכ PIN
         account = self.bank.get_account(acc_number)
         if account is None:
             messagebox.showerror("Error", "Account not found")
@@ -55,29 +63,33 @@ class ATMApp:
             messagebox.showerror("Error", "Account is blocked")
             return
         if not account.verify_pin(pin):
-            save_data(self.bank)
+            save_data(self.bank)  # שומרים כי מונה הנסיונות עלה
             messagebox.showerror("Error", "Wrong PIN")
             return
 
         self.current_account = account
         self.show_user_menu()
 
+    # TODO: צריך לבנות מסך כניסה למנהל
     def handle_admin_login(self):
         pass
 
+    # -------- תפריט משתמש --------
     def show_user_menu(self):
         self.clear_screen()
 
         name = self.current_account.name
         balance = self.current_account.balance
 
-        tk.Label(self.root, text=f"Welcome, {name}", font=("Segoe UI", 20, "bold"),
+        tk.Label(self.root, text="Welcome, " + name, font=("Segoe UI", 20, "bold"),
                  bg="#1a237e", fg="white").pack(pady=10)
 
+        # שומרים reference כדי לעדכן את היתרה אחרי כל פעולה
         self.balance_label = tk.Label(self.root, text="Balance: " + str(balance),
                  font=("Segoe UI", 16), bg="#1a237e", fg="#4caf50")
         self.balance_label.pack(pady=5)
 
+        # כל הכפתורים של התפריט
         buttons = [
             ("Deposit", self.show_deposit),
             ("Withdraw", self.show_withdraw),
@@ -92,6 +104,7 @@ class ATMApp:
                       bg="white", fg="#1a237e", width=20,
                       command=command).pack(pady=5)
 
+    # -------- הפקדה --------
     def show_deposit(self):
         # פותח חלון חדש להפקדה
         self.deposit_window = tk.Toplevel(self.root)
@@ -110,12 +123,13 @@ class ATMApp:
                   bg="#4caf50", fg="white", width=15,
                   command=self.do_deposit).pack(pady=15)
 
+    # מבצע את ההפקדה בפועל אחרי לחיצה על הכפתור
     def do_deposit(self):
         text = self.deposit_entry.get()
         if text == "":
             messagebox.showerror("Error", "Please enter an amount")
             return
-        # בדיקה שזה מספר
+        # בדיקה שהמשתמש הכניס מספר ולא טקסט
         try:
             amount = float(text)
         except:
@@ -132,9 +146,9 @@ class ATMApp:
         messagebox.showinfo("Success", message)
         self.deposit_window.destroy()
 
-# חוזר על העקרון שעשיתי ב DEPOSIT
+    # -------- משיכה --------
+    # אותו עיקרון כמו הפקדה רק קורא ל-withdraw
     def show_withdraw(self):
-        # חלון משיכה - אותו עיקרון כמו הפקדה
         self.withdraw_window = tk.Toplevel(self.root)
         self.withdraw_window.title("Withdraw")
         self.withdraw_window.geometry("300x200")
@@ -172,12 +186,14 @@ class ATMApp:
         messagebox.showinfo("Success", message)
         self.withdraw_window.destroy()
 
-
+    # TODO: העברה בין חשבונות
     def show_transfer(self):
         pass
 
+    # TODO: הצגת היסטוריית עסקאות
     def show_history(self):
         pass
 
+    # TODO: שינוי PIN
     def show_change_pin(self):
         pass
