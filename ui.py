@@ -74,8 +74,9 @@ class ATMApp:
         tk.Label(self.root, text=f"Welcome, {name}", font=("Segoe UI", 20, "bold"),
                  bg="#1a237e", fg="white").pack(pady=10)
 
-        tk.Label(self.root, text=f"Balance: {balance}", font=("Segoe UI", 16),
-                 bg="#1a237e", fg="#4caf50").pack(pady=5)
+        self.balance_label = tk.Label(self.root, text="Balance: " + str(balance),
+                                      font=("Segoe UI", 16), bg="#1a237e", fg="#4caf50")
+        self.balance_label.pack(pady=5)
 
         buttons = [
             ("Deposit", self.show_deposit),
