@@ -66,4 +66,42 @@ class ATMApp:
         pass
 
     def show_user_menu(self):
+        self.clear_screen()
+
+        name = self.current_account.name
+        balance = self.current_account.balance
+
+        tk.Label(self.root, text=f"Welcome, {name}", font=("Segoe UI", 20, "bold"),
+                 bg="#1a237e", fg="white").pack(pady=10)
+
+        tk.Label(self.root, text=f"Balance: {balance}", font=("Segoe UI", 16),
+                 bg="#1a237e", fg="#4caf50").pack(pady=5)
+
+        buttons = [
+            ("Deposit", self.show_deposit),
+            ("Withdraw", self.show_withdraw),
+            ("Transfer", self.show_transfer),
+            ("History", self.show_history),
+            ("Change PIN", self.show_change_pin),
+            ("Logout", self.show_login_screen)
+        ]
+
+        for text, command in buttons:
+            tk.Button(self.root, text=text, font=("Segoe UI", 13),
+                      bg="white", fg="#1a237e", width=20,
+                      command=command).pack(pady=5)
+
+    def show_deposit(self):
+        pass
+
+    def show_withdraw(self):
+        pass
+
+    def show_transfer(self):
+        pass
+
+    def show_history(self):
+        pass
+
+    def show_change_pin(self):
         pass
