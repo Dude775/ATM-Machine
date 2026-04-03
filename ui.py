@@ -186,9 +186,60 @@ class ATMApp:
         messagebox.showinfo("Success", message)
         self.withdraw_window.destroy()
 
-    # TODO: העברה בין חשבונות
+    # -------- העברה --------
+    # צריך שני שדות - מספר חשבון יעד וסכום
     def show_transfer(self):
-        pass
+        self.transfer_window = tk.Toplevel(self.root)
+        self.transfer_window.title("Transfer")
+        self.transfer_window.geometry("300x250")
+        self.transfer_window.configure(bg="#1a237e")
+
+        tk.Label(self.transfer_window, text="Target account number:",
+                 font=("Segoe UI", 12), bg="#1a237e", fg="white").pack(pady=5)
+
+        self.transfer_target_entry = tk.Entry(self.transfer_window,
+                                              font=("Segoe UI", 14), justify="center")
+        self.transfer_target_entry.pack(pady=5)
+
+        tk.Label(self.transfer_window, text="Amount:",
+                 font=("Segoe UI", 12), bg="#1a237e", fg="white").pack(pady=5)
+
+        self.transfer_amount_entry = tk.Entry(self.transfer_window,
+                                              font=("Segoe UI", 14), justify="center")
+        self.transfer_amount_entry.pack(pady=5)
+
+        tk.Button(self.transfer_window, text="Transfer", font=("Segoe UI", 13),
+                  bg="#ff9800", fg="white", width=15,
+                  command=self.do_transfer).pack(pady=15)
+
+    def do_transfer(self):
+        target = self.transfer_target_entry.get()
+        text = self.transfer_amount_entry.get()
+
+        if target == "" or text == "":
+            messagebox.showerror("Error", "Please fill all fields")
+            return
+        # בדיקה שלא מעבירים לעצמך
+        if target == self.current_account.account_number:
+            messagebox.showerror("Error", "Cannot transfer to yourself")
+            return
+        try:
+            amount = float(text)
+        except:
+            messagebox.showerror("Error", "Please enter a valid number")
+            return
+
+        # הלוגיקה של ההעברה נמצאת ב-Bank ולא כאן
+        success, message = self.bank.transfer(self.current_account, target, amount)
+        if not success:
+            messagebox.showerror("Error", message)
+            return
+
+        save_data(self.bank)
+        self.balance_label.config(text="Balance: " + str(self.current_account.balance))
+        messagebox.showinfo("Success", message)
+        self.transfer_window.destroy()
+
 
     # TODO: הצגת היסטוריית עסקאות
     def show_history(self):
