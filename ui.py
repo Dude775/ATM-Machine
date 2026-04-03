@@ -276,6 +276,16 @@ class ATMApp:
 
 
 
-    # TODO: שינוי PIN
+    # -------- שינוי PIN --------
+    # TODO: צריך לבדוק PIN ישן, PIN חדש, ואימות
     def show_change_pin(self):
-        pass
+        self.pin_window = tk.Toplevel(self.root)
+        self.pin_window.title("Change PIN")
+        self.pin_window.geometry("300x300")
+        self.pin_window.configure(bg="#1a237e")
+
+        tk.Label(self.pin_window, text="Change PIN",
+                 font=("Segoe UI", 16, "bold"), bg="#1a237e", fg="white").pack(pady=10)
+
+        # TODO: שדות להכנסת PIN ישן, חדש, ואימות
+
