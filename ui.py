@@ -253,7 +253,27 @@ class ATMApp:
 
         history = self.current_account.history
 
-        # TODO: להוסיף הצגת עסקאות ובדיקה אם ריק
+                # אם אין עסקאות עדיין
+        if len(history) == 0:
+            tk.Label(self.history_window, text="No transactions yet",
+                     font=("Segoe UI", 12), bg="#1a237e", fg="white").pack(pady=20)
+            return
+
+        # תיבת טקסט להצגת העסקאות
+        text_box = tk.Text(self.history_window, font=("Segoe UI", 10),
+                           width=45, height=15, state="normal")
+        text_box.pack(pady=5)
+
+        # עובר על כל עסקה ומוסיף שורה
+        for record in history:
+            line = record["date"] + " | " + record["type"] + " | " + str(record["amount"])
+            if "target" in record:
+                line = line + " | account " + str(record["target"])
+            text_box.insert(tk.END, line + "\n")
+
+        # נועל את הטקסט שהמשתמש לא ישנה
+        text_box.config(state="disabled")
+
 
 
     # TODO: שינוי PIN
