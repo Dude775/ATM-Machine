@@ -284,7 +284,8 @@ class ATMApp:
 
         tk.Label(self.pin_window, text="Change PIN",
                  font=("Segoe UI", 16, "bold"), bg="#1a237e", fg="white").pack(pady=10)
-                # PIN נוכחי
+
+        # PIN נוכחי
         tk.Label(self.pin_window, text="Current PIN:", font=("Segoe UI", 11),
                  bg="#1a237e", fg="white").pack(pady=3)
         self.old_pin_entry = tk.Entry(self.pin_window, font=("Segoe UI", 14),
@@ -305,7 +306,32 @@ class ATMApp:
                                           justify="center", show="*")
         self.confirm_pin_entry.pack(pady=3)
 
-        # TODO: כפתור ולוגיקה
+        tk.Button(self.pin_window, text="Change PIN", font=("Segoe UI", 13),
+                  bg="#ff9800", fg="white", width=15,
+                  command=self.do_change_pin).pack(pady=10)
+
+    def do_change_pin(self):
+        old = self.old_pin_entry.get()
+        new = self.new_pin_entry.get()
+        confirm = self.confirm_pin_entry.get()
+
+        if old == "" or new == "" or confirm == "":
+            messagebox.showerror("Error", "Please fill all fields")
+            return
+        # בדיקה שהPIN החדש והאימות תואמים
+        if new != confirm:
+            messagebox.showerror("Error", "New PIN does not match")
+            return
+
+        success, message = self.current_account.change_pin(old, new)
+        if not success:
+            messagebox.showerror("Error", message)
+            return
+
+        save_data(self.bank)
+        messagebox.showinfo("Success", message)
+        self.pin_window.destroy()
+
 
 
 
