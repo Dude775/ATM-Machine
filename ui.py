@@ -275,9 +275,7 @@ class ATMApp:
         text_box.config(state="disabled")
 
 
-
     # -------- שינוי PIN --------
-    # TODO: צריך לבדוק PIN ישן, PIN חדש, ואימות
     def show_change_pin(self):
         self.pin_window = tk.Toplevel(self.root)
         self.pin_window.title("Change PIN")
@@ -287,5 +285,27 @@ class ATMApp:
         tk.Label(self.pin_window, text="Change PIN",
                  font=("Segoe UI", 16, "bold"), bg="#1a237e", fg="white").pack(pady=10)
 
-        # TODO: שדות להכנסת PIN ישן, חדש, ואימות
+        # PIN נוכחי
+        tk.Label(self.pin_window, text="Current PIN:", font=("Segoe UI", 11),
+                 bg="#1a237e", fg="white").pack(pady=3)
+        self.old_pin_entry = tk.Entry(self.pin_window, font=("Segoe UI", 14),
+                                      justify="center", show="*")
+        self.old_pin_entry.pack(pady=3)
+
+        # PIN חדש
+        tk.Label(self.pin_window, text="New PIN:", font=("Segoe UI", 11),
+                 bg="#1a237e", fg="white").pack(pady=3)
+        self.new_pin_entry = tk.Entry(self.pin_window, font=("Segoe UI", 14),
+                                      justify="center", show="*")
+        self.new_pin_entry.pack(pady=3)
+
+        # אימות PIN חדש
+        tk.Label(self.pin_window, text="Confirm New PIN:", font=("Segoe UI", 11),
+                 bg="#1a237e", fg="white").pack(pady=3)
+        self.confirm_pin_entry = tk.Entry(self.pin_window, font=("Segoe UI", 14),
+                                          justify="center", show="*")
+        self.confirm_pin_entry.pack(pady=3)
+
+        # TODO: כפתור + לוגיקה של בדיקות ושמירה
+
 
