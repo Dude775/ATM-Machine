@@ -240,10 +240,21 @@ class ATMApp:
         messagebox.showinfo("Success", message)
         self.transfer_window.destroy()
 
-
-    # TODO: הצגת היסטוריית עסקאות
+    # -------- היסטוריה --------
+    # מציג את כל הפעולות שנעשו בחשבון
     def show_history(self):
-        pass
+        self.history_window = tk.Toplevel(self.root)
+        self.history_window.title("Transaction History")
+        self.history_window.geometry("400x350")
+        self.history_window.configure(bg="#1a237e")
+
+        tk.Label(self.history_window, text="Transaction History",
+                 font=("Segoe UI", 16, "bold"), bg="#1a237e", fg="white").pack(pady=10)
+
+        history = self.current_account.history
+
+        # TODO: להוסיף הצגת עסקאות ובדיקה אם ריק
+
 
     # TODO: שינוי PIN
     def show_change_pin(self):
