@@ -103,8 +103,19 @@ class ATMApp:
 
         tk.Label(self.root, text="Admin Panel", font=("Segoe UI", 22, "bold"),
                  bg="#1a237e", fg="white").pack(pady=15)
+        buttons = [
+            ("Create Account", self.show_create_account),
+            ("View All Accounts", self.show_all_accounts),
+            ("Block / Unblock Account", self.show_toggle_account),
+            ("Logout", self.show_login_screen)
+        ]
 
-        # TODOעולות מנהל: כפתורי פ
+        for text, command in buttons:
+            tk.Button(self.root, text=text, font=("Segoe UI", 13),
+                      bg="white", fg="#1a237e", width=25,
+                      command=command).pack(pady=8)
+
+        # TODOעולות מנהל: כפתורי 
         # TODO: לתקן את הפאנל ואת הצבע 
 
 # ! תמיד למחוק TODO שנגמר ובוצע
