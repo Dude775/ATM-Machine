@@ -233,6 +233,24 @@ class ATMApp:
         self.toggle_entry.pack(pady=5)
 
         # TODO: button and logic
+        tk.Button(self.toggle_window, text="Toggle", font=("Segoe UI", 13),
+                  bg="#f44336", fg="white", width=15,
+                  command=self.do_toggle_account).pack(pady=15)
+
+    def do_toggle_account(self):
+        acc_number = self.toggle_entry.get()
+        if acc_number == "":
+            messagebox.showerror("Error", "Please enter account number")
+            return
+
+        success, message = self.bank.toggle_account(acc_number)
+        if not success:
+            messagebox.showerror("Error", message)
+            return
+
+        save_data(self.bank)
+        messagebox.showinfo("Success", message)
+        self.toggle_window.destroy()
 
 
 
