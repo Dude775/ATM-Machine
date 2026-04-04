@@ -160,14 +160,15 @@ class ATMApp:
             messagebox.showerror("Error", "Balance must be a number")
             return
 
-        # TODO: create account number and save
-
-
-        # TODO: button and logic
-
-# TODO: הצגת כל החשבונות
-    def show_all_accounts(self):
-        pass
+        all_accounts = self.bank.accounts
+        if len(all_accounts) == 0:
+            new_number = "100"
+        else:
+            biggest = 0
+            for num in all_accounts:
+                if int(num) > biggest:
+                    biggest = int(num)
+            new_number = str(biggest + 1)
 
 # TODO: חסימה ושחרור חשבון
     def show_toggle_account(self):
