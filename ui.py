@@ -70,9 +70,23 @@ class ATMApp:
         self.current_account = account
         self.show_user_menu()
 
-    # TODO: צריך לבנות מסך כניסה למנהל
+    # -------- כניסת מנהל --------
     def handle_admin_login(self):
-        pass
+        # חלון קופץ לסיסמת מנהל
+        self.admin_login_window = tk.Toplevel(self.root)
+        self.admin_login_window.title("Admin Login")
+        self.admin_login_window.geometry("300x200")
+        self.admin_login_window.configure(bg="#1a237e")
+
+        tk.Label(self.admin_login_window, text="Admin Password:",
+                 font=("Segoe UI", 12), bg="#1a237e", fg="white").pack(pady=10)
+
+        self.admin_pass_entry = tk.Entry(self.admin_login_window,
+                                         font=("Segoe UI", 14), justify="center", show="*")
+        self.admin_pass_entry.pack(pady=5)
+
+        # TODO: כפתור login ובדיקת סיסמה
+
 
     # -------- תפריט משתמש --------
     def show_user_menu(self):
