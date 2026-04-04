@@ -185,9 +185,12 @@ class ATMApp:
         messagebox.showinfo("Success", "Account created!\nAccount number: " + new_number)
         self.create_window.destroy()
 
-# TODO: חסימה ושחרור חשבון
+# TODO: הצגה של חשבונות
     def show_toggle_account(self):
-        pass
+        self.accounts_window = tk.Toplevel(self.root)
+        self.accounts_window.title("all accounts")
+        self.accounts_window.geometry("450x350")
+        self.accounts_window.configure(bg="#1a237e")
 
 
 # ! תמיד למחוק TODO שנגמר ובוצע
