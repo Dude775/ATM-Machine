@@ -126,18 +126,25 @@ class ATMApp:
         tk.Label(self.create_window, text="Create New Account",
                  font=("Segoe UI", 14, "bold"), bg="#1a237e", fg="white").pack(pady=10)
         
-   # בעל חשבון חדש - שם חדש
+         # בעל חשבון חדש - שם חדש
         tk.Label(self.create_window, text="name:", font=("Segoe UI", 11),
                  bg="#1a237e", fg="white").pack(pady=3)
         self.new_name_entry = tk.Entry(self.create_window, font=("Segoe UI", 14),
                                        justify="center")
         self.new_name_entry.pack(pady=3)
    # PIN
-        tk.Label(self.create_window, text="pin (4 digits):", font=("Segoe UI", 11),
+        tk.Label(self.create_window, text="PIN (4 digits):", font=("Segoe UI", 11),
                  bg="#1a237e", fg="white").pack(pady=3)
         self.new_pin_entry = tk.Entry(self.create_window, font=("Segoe UI", 14),
-                                      justify="center")
+                                      justify="center", show="*")
         self.new_pin_entry.pack(pady=3)
+ # balance
+        tk.Label(self.create_window, text="initial balance:", font=("Segoe UI", 11),
+                 bg="#1a237e", fg="white").pack(pady=3)
+        self.new_balance_entry = tk.Entry(self.create_window, font=("Segoe UI", 14))
+        self.new_balance_entry.pack(pady=3)
+
+        # TODO: button and logic
 
     # TODO: הצגת כל החשבונות
     def show_all_accounts(self):
