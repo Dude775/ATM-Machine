@@ -127,7 +127,7 @@ class ATMApp:
                  font=("Segoe UI", 14, "bold"), bg="#1a237e", fg="white").pack(pady=10)
         
          # בעל חשבון חדש - שם חדש
-        tk.Label(self.create_window, text="name:", font=("Segoe UI", 11),
+        tk.Label(self.create_window, text="Name:", font=("Segoe UI", 11),
                  bg="#1a237e", fg="white").pack(pady=3)
         self.new_name_entry = tk.Entry(self.create_window, font=("Segoe UI", 14),
                                        justify="center")
@@ -139,10 +139,16 @@ class ATMApp:
                                       justify="center", show="*")
         self.new_pin_entry.pack(pady=3)
 # balance
+        tk.Label(self.create_window, text="Initial Balance:", font=("Segoe UI", 11),
+                 bg="#1a237e", fg="white").pack(pady=3)
+        self.new_balance_entry = tk.Entry(self.create_window, font=("Segoe UI", 14),
+                                          justify="center")
+        self.new_balance_entry.pack(pady=3)
+        
         tk.Button(self.create_window, text="Create", font=("Segoe UI", 13),
                   bg="#4caf50", fg="white", width=15,
                   command=self.do_create_account).pack(pady=15)
-
+# כפתורים ללחיצת לוגיקה
     def do_create_account(self):
         name = self.new_name_entry.get()
         pin = self.new_pin_entry.get()
@@ -159,7 +165,7 @@ class ATMApp:
         except:
             messagebox.showerror("Error", "Balance must be a number")
             return
-
+# יוצר מספר חשבון חדש - מוצא את הגבוה ביותר ומוסיף 1
         all_accounts = self.bank.accounts
         if len(all_accounts) == 0:
             new_number = "100"
@@ -169,6 +175,15 @@ class ATMApp:
                 if int(num) > biggest:
                     biggest = int(num)
             new_number = str(biggest + 1)
+
+        success, message = self.bank.add_account(new_number, name, pin, balance)
+        if not success:
+            messagebox.showerror("Error", message)
+            return
+
+        save_data(self.bank)
+        messagebox.showinfo("Success", "Account created!\nAccount number: " + new_number)
+        self.create_window.destroy()
 
 # TODO: חסימה ושחרור חשבון
     def show_toggle_account(self):
