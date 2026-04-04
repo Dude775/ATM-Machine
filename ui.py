@@ -85,7 +85,18 @@ class ATMApp:
                                          font=("Segoe UI", 14), justify="center", show="*")
         self.admin_pass_entry.pack(pady=5)
 
-        # TODO: כפתור login ובדיקת סיסמה
+        tk.Button(self.admin_login_window, text="Login", font=("Segoe UI", 13),
+                  bg="#f44336", fg="white", width=15,
+                  command=self.check_admin_password).pack(pady=15)
+    # בודק אם הסיסמה נכונה
+    def check_admin_password(self):
+        password = self.admin_pass_entry.get()
+        if password == self.bank.admin_password:
+            self.admin_login_window.destroy()
+            self.show_admin_menu()
+        else:
+            messagebox.showerror("Error", "Wrong admin password")
+
 
 
     # -------- תפריט משתמש --------
