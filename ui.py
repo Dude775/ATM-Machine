@@ -197,7 +197,12 @@ class ATMApp:
                  font=("Segoe UI", 14, "bold"), bg="#1a237e", fg="white").pack(pady=10)
 
         # TODO: table with account info
+        accounts_info = self.bank.get_all_accounts_info()
 
+        if len(accounts_info) == 0:
+            tk.Label(self.accounts_window, text="No accounts yet",
+                     font=("Segoe UI", 12), bg="#1a237e", fg="white").pack(pady=20)
+            return
 
 # ! תמיד למחוק TODO שנגמר ובוצע
 
