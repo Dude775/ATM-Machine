@@ -96,6 +96,7 @@ class ATMApp:
             self.show_admin_menu()
         else:
             messagebox.showerror("Error", "Wrong admin password")
+# !  מפה זה כל החלק של תפריט מנהל - UI/UX   
     # -------- תפריט מנהל --------
     def show_admin_menu(self):
         self.clear_screen()
@@ -217,6 +218,22 @@ class ATMApp:
             text_box.insert(tk.END, line + "\n")
 
         text_box.config(state="disabled")
+        # TODO: חסימה ושחרור חשבון
+    def show_toggle_account(self):
+        self.toggle_window = tk.Toplevel(self.root)
+        self.toggle_window.title("Block / Unblock")
+        self.toggle_window.geometry("300x200")
+        self.toggle_window.configure(bg="#1a237e")
+
+        tk.Label(self.toggle_window, text="Enter account number:",
+                 font=("Segoe UI", 12), bg="#1a237e", fg="white").pack(pady=10)
+
+        self.toggle_entry = tk.Entry(self.toggle_window, font=("Segoe UI", 14),
+                                     justify="center")
+        self.toggle_entry.pack(pady=5)
+
+        # TODO: button and logic
+
 
 
 # ! תמיד למחוק TODO שנגמר ובוצע
