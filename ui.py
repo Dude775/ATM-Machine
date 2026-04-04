@@ -145,7 +145,26 @@ class ATMApp:
                                           justify="center")
         self.new_balance_entry.pack(pady=3)
 
-        # TODO: כפתור יצירה ולוגיקה
+                tk.Button(self.create_window, text="Create", font=("Segoe UI", 13),
+                  bg="#4caf50", fg="white", width=15,
+                  command=self.do_create_account).pack(pady=15)
+
+    def do_create_account(self):
+        name = self.new_name_entry.get()
+        pin = self.new_pin_entry.get()
+        balance_text = self.new_balance_entry.get()
+
+        if name == "" or pin == "" or balance_text == "":
+            messagebox.showerror("Error", "fill all fields")
+            return
+        try:
+            balance = float(balance_text)
+        except:
+            messagebox.showerror("Eror", "balance must be a number")
+            return
+
+        # TODO: create account number and save
+
 
         # TODO: button and logic
 
