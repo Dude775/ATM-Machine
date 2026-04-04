@@ -138,14 +138,8 @@ class ATMApp:
         self.new_pin_entry = tk.Entry(self.create_window, font=("Segoe UI", 14),
                                       justify="center", show="*")
         self.new_pin_entry.pack(pady=3)
- # balance
-        tk.Label(self.create_window, text="Initial Balance:", font=("Segoe UI", 11),
-                 bg="#1a237e", fg="white").pack(pady=3)
-        self.new_balance_entry = tk.Entry(self.create_window, font=("Segoe UI", 14),
-                                          justify="center")
-        self.new_balance_entry.pack(pady=3)
-
-                tk.Button(self.create_window, text="Create", font=("Segoe UI", 13),
+# balance
+        tk.Button(self.create_window, text="Create", font=("Segoe UI", 13),
                   bg="#4caf50", fg="white", width=15,
                   command=self.do_create_account).pack(pady=15)
 
@@ -155,12 +149,15 @@ class ATMApp:
         balance_text = self.new_balance_entry.get()
 
         if name == "" or pin == "" or balance_text == "":
-            messagebox.showerror("Error", "fill all fields")
+            messagebox.showerror("Error", "Please fill all fields")
+            return
+        if len(pin) != 4:
+            messagebox.showerror("Error", "PIN must be 4 digits")
             return
         try:
             balance = float(balance_text)
         except:
-            messagebox.showerror("Eror", "balance must be a number")
+            messagebox.showerror("Error", "Balance must be a number")
             return
 
         # TODO: create account number and save
@@ -168,11 +165,11 @@ class ATMApp:
 
         # TODO: button and logic
 
-    # TODO: הצגת כל החשבונות
+# TODO: הצגת כל החשבונות
     def show_all_accounts(self):
         pass
 
-    # TODO: חסימה ושחרור חשבון
+# TODO: חסימה ושחרור חשבון
     def show_toggle_account(self):
         pass
 
