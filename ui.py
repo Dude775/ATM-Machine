@@ -119,11 +119,12 @@ class ATMApp:
             # TODO: יצירת חשבון חדש
     def show_create_account(self):
         self.create_window = tk.Toplevel(self.root)
-        self.create_window.title ("creat account")
+        self.create_window.title("Create Account")
         self.create_window.geometry("300x350")
         self.create_window.configure(bg="#1a237e")
-    tk.Label(self.create_window, text="create new account")
-        font=("Segou UI, 14, "bild"), bg="#1a237e", fg="white").pack(pandy=10)
+
+        tk.Label(self.create_window, text="Create New Account",
+                 font=("Segoe UI", 14, "bold"), bg="#1a237e", fg="white").pack(pady=10)
     # TODO: הצגת כל החשבונות
     def show_all_accounts(self):
         pass
