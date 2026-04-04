@@ -114,7 +114,20 @@ class ATMApp:
                       bg="white", fg="#1a237e", width=25,
                       command=command).pack(pady=8)
             
-        # TODO: לתקן את הפאנל ואת הצבע 
+    # TODO: לתקן את הפאנל ואת הצבע
+        
+            # TODO: יצירת חשבון חדש
+    def show_create_account(self):
+        pass
+
+    # TODO: הצגת כל החשבונות
+    def show_all_accounts(self):
+        pass
+
+    # TODO: חסימה ושחרור חשבון
+    def show_toggle_account(self):
+        pass
+
 
 # ! תמיד למחוק TODO שנגמר ובוצע
 
