@@ -101,8 +101,8 @@ class ATMApp:
     def show_admin_menu(self):
         self.clear_screen()
 
-        tk.Label(self.root, text="Admin Panel", font=("Segoe UI", 22, "bold"),
-                 bg="#1a237e", fg="white").pack(pady=15)
+        tk.Label(self.root, text="Admin Panel", font=("Segoe UI", 12, "bold"),
+                 bg="#1a237D", fg="white").pack(pady=10)
         buttons = [
             ("Create Account", self.show_create_account),
             ("View All Accounts", self.show_all_accounts),
@@ -111,11 +111,10 @@ class ATMApp:
         ]
 
         for text, command in buttons:
-            tk.Button(self.root, text=text, font=("Segoe UI", 13),
-                      bg="white", fg="#1a237e", width=25,
+            tk.Button(self.root, text=text, font=("Segoe UI", 15),
+                      bg="white", fg="#1a247e", width=25,
                       command=command).pack(pady=8)
-
-        # TODOעולות מנהל: כפתורי 
+            
         # TODO: לתקן את הפאנל ואת הצבע 
 
 # ! תמיד למחוק TODO שנגמר ובוצע
