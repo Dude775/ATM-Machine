@@ -97,10 +97,17 @@ class ATMApp:
         else:
             messagebox.showerror("Error", "Wrong admin password")
     # TODO: תפריט מנהל עם כל הפעולות
+    # -------- תפריט מנהל --------
     def show_admin_menu(self):
-        pass
+        self.clear_screen()
+
+        tk.Label(self.root, text="Admin Panel", font=("Segoe UI", 22, "bold"),
+                 bg="#1a237e", fg="white").pack(pady=15)
+
+        # TODO: כפתורי פעולות מנהל
 
 
+# ! תמיד למחוק TODO שנגמר ובוצע
 
     # -------- תפריט משתמש --------
     def show_user_menu(self):
