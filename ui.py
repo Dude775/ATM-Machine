@@ -203,6 +203,21 @@ class ATMApp:
             tk.Label(self.accounts_window, text="No accounts yet",
                      font=("Segoe UI", 12), bg="#1a237e", fg="white").pack(pady=20)
             return
+        
+                # הצגת חשבונות בתיבת טקסט
+        text_box = tk.Text(self.accounts_window, font=("Segoe UI", 10),
+                           width=50, height=15, state="normal")
+        text_box.pack(pady=5)
+
+        text_box.insert(tk.END, "Number | Name | Balance | Status\n")
+        text_box.insert(tk.END, "-" * 40 + "\n")
+
+        for acc in accounts_info:
+            line = str(acc["number"]) + " | " + acc["name"] + " | " + str(acc["balance"]) + " | " + acc["status"]
+            text_box.insert(tk.END, line + "\n")
+
+        text_box.config(state="disabled")
+
 
 # ! תמיד למחוק TODO שנגמר ובוצע
 
