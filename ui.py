@@ -96,6 +96,9 @@ class ATMApp:
             self.show_admin_menu()
         else:
             messagebox.showerror("Error", "Wrong admin password")
+    # TODO: תפריט מנהל עם כל הפעולות
+    def show_admin_menu(self):
+        pass
 
 
 
