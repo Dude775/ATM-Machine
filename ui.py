@@ -104,8 +104,8 @@ class ATMApp:
         tk.Label(self.root, text="Admin Panel", font=("Segoe UI", 22, "bold"),
                  bg="#1a237e", fg="white").pack(pady=15)
 
-        # TODO: כפתורי פעולות מנהל
-
+        # TODOעולות מנהל: כפתורי פ
+        # TODO: לתקן את הפאנל ואת הצבע 
 
 # ! תמיד למחוק TODO שנגמר ובוצע
 
