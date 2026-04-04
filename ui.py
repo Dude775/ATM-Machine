@@ -110,8 +110,8 @@ class ATMApp:
         ]
 
         for text, command in buttons:
-            tk.Button(self.root, text=text, font=("Segoe UI", 1),
-                      bg="white", fg="#1a247e", width=25,
+            tk.Button(self.root, text=text, font=("Segoe UI", 13),
+                      bg="white", fg="#1a237e", width=25,
                       command=command).pack(pady=8)
             
         # TODO: לתקן את הפאנל ואת הצבע 
