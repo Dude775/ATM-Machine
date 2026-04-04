@@ -139,10 +139,13 @@ class ATMApp:
                                       justify="center", show="*")
         self.new_pin_entry.pack(pady=3)
  # balance
-        tk.Label(self.create_window, text="initial balance:", font=("Segoe UI", 11),
+        tk.Label(self.create_window, text="Initial Balance:", font=("Segoe UI", 11),
                  bg="#1a237e", fg="white").pack(pady=3)
-        self.new_balance_entry = tk.Entry(self.create_window, font=("Segoe UI", 14))
+        self.new_balance_entry = tk.Entry(self.create_window, font=("Segoe UI", 14),
+                                          justify="center")
         self.new_balance_entry.pack(pady=3)
+
+        # TODO: כפתור יצירה ולוגיקה
 
         # TODO: button and logic
 
