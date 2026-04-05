@@ -1,11 +1,6 @@
 import tkinter as tk
-from models import Bank
-from storage import load_data
-from ui import ATMApp
-
-bank = Bank()
-load_data(bank)
+from app import ATMApp
 
 root = tk.Tk()
-app = ATMApp(root, bank)
+app = ATMApp(root)
 root.mainloop()
