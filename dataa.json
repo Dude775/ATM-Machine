@@ -1,0 +1,275 @@
+{
+  "admin_password": "admin123",
+  "accounts": {
+    "100": {
+      "account_number": "100",
+      "name": "David",
+      "pin": "1234",
+      "balance": 8001.0,
+      "is_active": true,
+      "history": [
+        {
+          "type": "deposit",
+          "amount": 100.0,
+          "date": "2026-04-02 16:56",
+          "balance_after": 600.0
+        },
+        {
+          "type": "deposit",
+          "amount": 100.0,
+          "date": "2026-04-02 16:56",
+          "balance_after": 700.0
+        },
+        {
+          "type": "withdraw",
+          "amount": 100.0,
+          "date": "2026-04-02 17:02",
+          "balance_after": 600.0
+        },
+        {
+          "type": "deposit",
+          "amount": 999000.0,
+          "date": "2026-04-02 17:03",
+          "balance_after": 999600.0
+        },
+        {
+          "type": "deposit",
+          "amount": 400.0,
+          "date": "2026-04-02 17:03",
+          "balance_after": 1000000.0
+        },
+        {
+          "type": "withdraw",
+          "amount": 999999.0,
+          "date": "2026-04-02 17:03",
+          "balance_after": 1.0
+        },
+        {
+          "type": "deposit",
+          "amount": 499.0,
+          "date": "2026-04-02 17:05",
+          "balance_after": 500.0
+        },
+        {
+          "type": "deposit",
+          "amount": 600.0,
+          "date": "2026-04-02 17:20",
+          "balance_after": 1100.0
+        },
+        {
+          "type": "deposit",
+          "amount": 400.0,
+          "date": "2026-04-03 11:38",
+          "balance_after": 1500.0
+        },
+        {
+          "type": "withdraw",
+          "amount": 500.0,
+          "date": "2026-04-03 11:39",
+          "balance_after": 1000.0
+        },
+        {
+          "type": "withdraw",
+          "amount": 999.0,
+          "date": "2026-04-03 11:39",
+          "balance_after": 1.0
+        },
+        {
+          "type": "deposit",
+          "amount": 1.0,
+          "date": "2026-04-03 11:40",
+          "balance_after": 2.0
+        },
+        {
+          "type": "withdraw",
+          "amount": 2.0,
+          "date": "2026-04-03 11:40",
+          "balance_after": 0.0
+        },
+        {
+          "type": "deposit",
+          "amount": 500.0,
+          "date": "2026-04-03 13:57",
+          "balance_after": 500.0
+        },
+        {
+          "type": "withdraw",
+          "amount": 50.0,
+          "date": "2026-04-03 13:57",
+          "balance_after": 450.0
+        },
+        {
+          "type": "transfer_out",
+          "amount": 50.0,
+          "date": "2026-04-03 13:57",
+          "balance_after": 450.0,
+          "target": "101"
+        },
+        {
+          "type": "withdraw",
+          "amount": 50.0,
+          "date": "2026-04-03 13:58",
+          "balance_after": 400.0
+        },
+        {
+          "type": "transfer_out",
+          "amount": 50.0,
+          "date": "2026-04-03 13:58",
+          "balance_after": 400.0,
+          "target": "101"
+        },
+        {
+          "type": "deposit",
+          "amount": 100.0,
+          "date": "2026-04-03 14:00",
+          "balance_after": 500.0
+        },
+        {
+          "type": "transfer_in",
+          "amount": 100.0,
+          "date": "2026-04-03 14:00",
+          "balance_after": 500.0,
+          "target": "101"
+        },
+        {
+          "type": "withdraw",
+          "amount": 130.0,
+          "date": "2026-04-03 17:33",
+          "balance_after": 370.0
+        },
+        {
+          "type": "transfer_out",
+          "amount": 130.0,
+          "date": "2026-04-03 17:33",
+          "balance_after": 370.0,
+          "target": "101"
+        },
+        {
+          "type": "deposit",
+          "amount": 630.0,
+          "date": "2026-04-03 17:34",
+          "balance_after": 1000.0
+        },
+        {
+          "type": "withdraw",
+          "amount": 999.0,
+          "date": "2026-04-03 17:34",
+          "balance_after": 1.0
+        },
+        {
+          "type": "deposit",
+          "amount": 4000.0,
+          "date": "2026-04-03 17:34",
+          "balance_after": 4001.0
+        },
+        {
+          "type": "deposit",
+          "amount": 4000.0,
+          "date": "2026-04-03 17:35",
+          "balance_after": 8001.0
+        },
+        {
+          "type": "transfer_in",
+          "amount": 4000.0,
+          "date": "2026-04-03 17:35",
+          "balance_after": 8001.0,
+          "target": "101"
+        }
+      ],
+      "failed_attempts": 0
+    },
+    "101": {
+      "account_number": "101",
+      "name": "Daniel",
+      "pin": "9999",
+      "balance": 4000.0,
+      "is_active": true,
+      "history": [
+        {
+          "type": "deposit",
+          "amount": 50.0,
+          "date": "2026-04-03 13:57",
+          "balance_after": 1050.0
+        },
+        {
+          "type": "transfer_in",
+          "amount": 50.0,
+          "date": "2026-04-03 13:57",
+          "balance_after": 1050.0,
+          "target": "100"
+        },
+        {
+          "type": "deposit",
+          "amount": 50.0,
+          "date": "2026-04-03 13:58",
+          "balance_after": 1100.0
+        },
+        {
+          "type": "transfer_in",
+          "amount": 50.0,
+          "date": "2026-04-03 13:58",
+          "balance_after": 1100.0,
+          "target": "100"
+        },
+        {
+          "type": "withdraw",
+          "amount": 100.0,
+          "date": "2026-04-03 14:00",
+          "balance_after": 1000.0
+        },
+        {
+          "type": "transfer_out",
+          "amount": 100.0,
+          "date": "2026-04-03 14:00",
+          "balance_after": 1000.0,
+          "target": "100"
+        },
+        {
+          "type": "deposit",
+          "amount": 130.0,
+          "date": "2026-04-03 17:33",
+          "balance_after": 1130.0
+        },
+        {
+          "type": "transfer_in",
+          "amount": 130.0,
+          "date": "2026-04-03 17:33",
+          "balance_after": 1130.0,
+          "target": "100"
+        },
+        {
+          "type": "deposit",
+          "amount": 4000.0,
+          "date": "2026-04-03 17:35",
+          "balance_after": 5130.0
+        },
+        {
+          "type": "withdraw",
+          "amount": 1130.0,
+          "date": "2026-04-03 17:35",
+          "balance_after": 4000.0
+        },
+        {
+          "type": "withdraw",
+          "amount": 4000.0,
+          "date": "2026-04-03 17:35",
+          "balance_after": 0.0
+        },
+        {
+          "type": "transfer_out",
+          "amount": 4000.0,
+          "date": "2026-04-03 17:35",
+          "balance_after": 0.0,
+          "target": "100"
+        },
+        {
+          "type": "deposit",
+          "amount": 4000.0,
+          "date": "2026-04-03 17:35",
+          "balance_after": 4000.0
+        }
+      ],
+      "failed_attempts": 1
+    }
+  }
+}

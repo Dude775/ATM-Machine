@@ -1,0 +1,22 @@
+[
+    {
+        "id": "admin",
+        "pas": "1234",
+        "name": "SuperAdmin",
+        "balance": 0,
+        "admin": "true",
+        "status": "enable",
+        "history": []
+    },
+    {
+        "id": "g",
+        "pas": "g",
+        "name": "g",
+        "balance": 500,
+        "admin": "false",
+        "status": "enable",
+        "history": [
+            "Sun Apr 5 13:45:00 2026 you deposited 500"
+        ]
+    }
+]

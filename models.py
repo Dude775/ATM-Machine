@@ -1,142 +1,131 @@
-import datetime
+from storage import load_json, write_json
+from utils import now_str, secure_random_string
 
-# המחלקה הזאת מייצגת חשבון בנק אחד
-# כל חשבון יודע את הפרטים שלו ויודע לעשות פעולות על עצמו
+
 class Account:
-    def __init__(self, account_number, name, pin, balance=0):
-        self.account_number = account_number
-        self.name = name
-        self.pin = pin
-        self.balance = balance
-        self.is_active = True
-        self.history = []
-        self.failed_attempts = 0
-        
-            # בודק אם הקוד שהמשתמש הכניס נכון
-    # אם טעה 3 פעמים - החשבון ננעל אוטומטית
-    def verify_pin(self, pin):
-        if self.failed_attempts >= 3:
-            self.is_active = False
-            return False
-        if self.pin == pin:
-            self.failed_attempts = 0
-            return True
-        self.failed_attempts = self.failed_attempts + 1
-        return False
-    
-#  הפקדת כסף - מחזיר שני ערכים: הצליח/נכשל + הודעה
-    def deposit(self, amount):
-        if amount <= 0:
-            return False, "Amount must be positive"
-        self.balance = self.balance + amount
-        self._add_to_history("deposit", amount)
-        return True, "Deposit successful"
-    
-# משיכת כסף - בודק שיש מספיק יתרה לפני המשיכה
+    def __init__(self, data):
+        self.id = data["id"]
+        self.pas = data["pas"]
+        self.name = data["name"]
+        self.balance = data["balance"]
+        self.admin = data["admin"]     
+        self.status = data["status"]    
+        self.history = data["history"]  
 
-    def withdraw(self, amount):
-        if amount <= 0:
-            return False, "Amount must be positive"
-        if amount > self.balance:
-            return False, "Not enough balance"
-        self.balance = self.balance - amount
-        self._add_to_history("withdraw", amount)
-        return True, "Withdraw successful"
-
-# בדיקה שה - PIN הישן נכון -> אחכ עושה בדיקה שהוא 4 ספות .    
-    def change_pin(self, old_pin, new_pin):
-        if old_pin != self.pin:
-            return False, "Wrong PIN"
-        if len(str(new_pin)) != 4:
-            return False, "PIN must be 4 digits"
-        self.pin = new_pin
-        return True, "PIN changed successfully"
-    
-    # פונקציה פנימית - מתעדת כל פעולה שקרתה בחשבון
-    # שומרת את הסוג, הסכום, התאריך, והיתרה אחרי הפעולה
-    def _add_to_history(self, action_type, amount, target=None):
-        record = {
-            "type": action_type,
-            "amount": amount,
-            "date": datetime.datetime.now().strftime("%Y-%m-%d %H:%M"),
-            "balance_after": self.balance
-        }
-        if target:
-            record["target"] = target
-        self.history.append(record)
-
-    # ממיר את כל המידע של החשבון ל-dictionary כדי שנוכל לשמור ב-JSON
     def to_dict(self):
         return {
-            "account_number": self.account_number,
+            "id": self.id,
+            "pas": self.pas,
             "name": self.name,
-            "pin": self.pin,
             "balance": self.balance,
-            "is_active": self.is_active,
+            "admin": self.admin,
+            "status": self.status,
             "history": self.history,
-            "failed_attempts": self.failed_attempts
         }
 
+    def save(self):
+        write_json(self.to_dict())
 
-# מחלקה שמנהלת את כל החשבונות במערכת - כמו מסד נתונים
+    def deposit(self, amount: float):
+        self.balance += amount
+        self.history.append(f"{now_str()} you deposited {amount}")
+        self.save()
+
+    def withdraw(self, amount: float) -> bool:
+        if self.balance - amount < 0:
+            return False
+        self.balance -= amount
+        self.history.append(f"{now_str()} you withdrew {amount}")
+        self.save()
+        return True
+
+    def transfer_to(self, other: "Account", amount: float) -> bool:
+        if self.balance - amount < 0:
+            return False
+        self.balance -= amount
+        self.history.append(
+            f"{now_str()} you sent {amount} to account {other.id}"
+        )
+        self.save()
+
+        other.balance += amount
+        other.history.append(
+            f"{now_str()} account {self.id} sent you {amount}"
+        )
+        other.save()
+        return True
+
+    def change_password(self, old, new) -> bool:
+        if self.pas != old:
+            return False
+        self.pas = new
+        self.history.append(f"{now_str()} you changed your password")
+        self.save()
+        return True
+
+
 class Bank:
     def __init__(self):
-        self.accounts = {}  # כל החשבונות נשמרים פה לפי מספר חשבון
-        self.admin_password = "admin123"  # TODO: אולי לשמור את זה ב-JSON במקום hardcoded
+        self.accounts = []
+        self._load_accounts()
 
-    # יוצר חשבון חדש ומוסיף ל-dictionary
-    def add_account(self, account_number, name, pin, balance=0):
-        if account_number in self.accounts:
-            return False, "Account already exists"
-        new_account = Account(account_number, name, pin, balance)
-        self.accounts[account_number] = new_account
-        return True, "Account created"
+    def _load_accounts(self):
+        data = load_json()
+        self.accounts = [Account(acc) for acc in data]
 
-    # מחפש חשבון לפי מספר - מחזיר None אם לא קיים
-    def get_account(self, account_number):
-        if account_number in self.accounts:
-            return self.accounts[account_number]
+    def _save_account(self, acc: Account):
+        acc.save()
+        self._load_accounts()
+
+    def find_by_id(self, id_):
+        for acc in self.accounts:
+            if acc.id == id_:
+                return acc
         return None
 
-    # העברה בין חשבונות - הפעולה הכי מורכבת כאן
-    def transfer(self, from_account, to_number, amount):
-        to_account = self.get_account(to_number)
-        if to_account is None:
-            return False, "Target account not found"
-        if not to_account.is_active:
-            return False, "Target account is blocked"
+    def login(self, id_, pas):
+        for acc in self.accounts:
+            if acc.id == id_ and acc.pas == pas:
+                return acc
+        return None
 
-        # קודם מנסים למשוך מהשולח
-        success, message = from_account.withdraw(amount)
-        if not success:
-            return False, message
+    def create_account(self, id_, name, is_admin: bool):
+        if self.find_by_id(id_) is not None:
+            return None, "Account with this ID already exists"
 
-        # אם המשיכה עברה - מפקידים ליעד
-        to_account.deposit(amount)
-        # NOTE: שומרים היסטוריה בשני הצדדים - גם שולח וגם מקבל
-        from_account._add_to_history("transfer_out", amount, to_number)
-        to_account._add_to_history("transfer_in", amount, from_account.account_number)
-        return True, "Transfer successful"
+        pas = secure_random_string()
+        data = {
+            "id": id_,
+            "pas": pas,
+            "name": name,
+            "balance": 0.0,
+            "admin": "true" if is_admin else "false",
+            "status": "enable",
+            "history": [],
+        }
+        acc = Account(data)
+        acc.save()
+        self._load_accounts()
+        return acc, pas
 
-    # חסימה או שחרור חשבון - מחליף את הסטטוס
-    def toggle_account(self, account_number):
-        account = self.get_account(account_number)
-        if account is None:
+    def disable_account(self, id_, name):
+        acc = self.find_by_id(id_)
+        if not acc or acc.name != name:
             return False, "Account not found"
-        account.is_active = not account.is_active
-        status = "active" if account.is_active else "blocked"
-        return True, "Account is now " + status
+        if acc.admin == "true":
+            return False, "Admin can't disable itself"
+        acc.status = "disable"
+        acc.save()
+        return True, "Account disabled"
 
-    # מחזיר רשימה של כל החשבונות - לשימוש בפאנל מנהל
-    def get_all_accounts_info(self):
-        result = []
-        for number in self.accounts:
-            account = self.accounts[number]
-            result.append({
-                "number": number,
-                "name": account.name,
-                "balance": account.balance,
-                "status": "active" if account.is_active else "blocked"
-            })
-        return result
+    def enable_account(self, id_, name):
+        acc = self.find_by_id(id_)
+        if not acc or acc.name != name:
+            return False, "Account not found"
+        acc.status = "enable"
+        acc.save()
+        return True, "Account enabled"
 
+    def all_accounts(self):
+        self._load_accounts()
+        return self.accounts
