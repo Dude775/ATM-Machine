@@ -1,12 +1,11 @@
 import tkinter as tk
-from ui import login_screen
+from models import Bank
+from storage import load_data
+from ui import ATMApp
 
-if __name__ == "__main__":
-    root = tk.Tk()
-    root.title("Python ATM")
-    root.geometry("800x600")
-    root.configure(bg="#cfe3ff")
+bank = Bank()
+load_data(bank)
 
-    login_screen(root)
-
-    root.mainloop()
+root = tk.Tk()
+app = ATMApp(root, bank)
+root.mainloop()
