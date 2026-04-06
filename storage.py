@@ -13,25 +13,31 @@ def save_data(bank):
     for number in bank.accounts:
         data["accounts"][number] = bank.accounts[number].to_dict()
 
+    file = None
     try:
         file = open(DATA_FILE, "w", encoding="utf-8")
         json.dump(data, file, ensure_ascii=False, indent=2)
-        file.close()
     except Exception as e:
-        print("Error saving data: " + str(e))
+        print(f"שגיאה בשמירה: {e}")
+    finally:
+        if file:
+            file.close()
 
 
 def load_data(bank):
     if not os.path.exists(DATA_FILE):
         return
 
+    file = None
     try:
         file = open(DATA_FILE, "r", encoding="utf-8")
         data = json.load(file)
-        file.close()
     except Exception as e:
-        print("Error loading data: " + str(e))
+        print(f"שגיאה בטעינה: {e}")
         return
+    finally:
+        if file:
+            file.close()
 
     bank.admin_password = data.get("admin_password", "admin123")
 
@@ -41,9 +47,12 @@ def load_data(bank):
             acc_data["account_number"],
             acc_data["name"],
             acc_data["pin"],
-            acc_data["balance"]
+            acc_data.get("balance", 0),
+            phone=acc_data.get("phone", ""),
+            email=acc_data.get("email", ""),
+            id_number=acc_data.get("id_number", ""),
+            status=acc_data.get("status", "active" if acc_data.get("is_active", True) else "blocked")
         )
-        account.is_active = acc_data.get("is_active", True)
         account.history = acc_data.get("history", [])
         account.failed_attempts = acc_data.get("failed_attempts", 0)
         bank.accounts[number] = account

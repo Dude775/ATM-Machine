@@ -2,8 +2,8 @@ import tkinter as tk
 from tkinter import messagebox
 from styles import COLORS, FONT_SUBTITLE, FONT_LABEL, FONT_ENTRY, FONT_BUTTON
 
-# מסך העברה בין חשבונות
-class TransferScreen(tk.Frame):
+# מסך הפקדה
+class DepositScreen(tk.Frame):
     def __init__(self, root, app):
         tk.Frame.__init__(self, root, bg=COLORS["bg"])
         self.app = app
@@ -11,51 +11,40 @@ class TransferScreen(tk.Frame):
         center = tk.Frame(self, bg=COLORS["bg"])
         center.place(relx=0.5, rely=0.5, anchor="center")
 
-        tk.Label(center, text="Transfer", font=FONT_SUBTITLE,
+        tk.Label(center, text="Deposit", font=FONT_SUBTITLE,
                  bg=COLORS["bg"], fg=COLORS["white"]).pack(pady=(0, 5))
 
-        tk.Frame(center, bg=COLORS["orange"], height=3, width=150).pack(pady=(0, 20))
+        tk.Frame(center, bg=COLORS["green"], height=3, width=150).pack(pady=(0, 20))
 
+        # יתרה נוכחית
         self.bal_label = tk.Label(center,
-                 text="Your balance: $" + str(self.app.current_account.balance),
+                 text="Current balance: $" + str(self.app.current_account.balance),
                  font=FONT_LABEL, bg=COLORS["bg"], fg=COLORS["green"])
         self.bal_label.pack(pady=(0, 15))
 
-        # חשבון יעד
-        tk.Label(center, text="Target account number", font=FONT_LABEL,
-                 bg=COLORS["bg"], fg=COLORS["text_light"]).pack()
-        self.target_entry = tk.Entry(center, font=FONT_ENTRY, justify="center",
-                                     bg=COLORS["bg_light"], fg=COLORS["white"],
-                                     insertbackground="white", relief="flat", width=22)
-        self.target_entry.pack(pady=(3, 12), ipady=5)
-
-        # סכום
-        tk.Label(center, text="Amount", font=FONT_LABEL,
+        tk.Label(center, text="Enter amount", font=FONT_LABEL,
                  bg=COLORS["bg"], fg=COLORS["text_light"]).pack()
         self.amount_entry = tk.Entry(center, font=FONT_ENTRY, justify="center",
                                      bg=COLORS["bg_light"], fg=COLORS["white"],
                                      insertbackground="white", relief="flat", width=22)
         self.amount_entry.pack(pady=(3, 20), ipady=5)
 
-        tk.Button(center, text="Transfer", font=FONT_BUTTON,
-                  bg=COLORS["orange"], fg=COLORS["white"], width=20,
+        tk.Button(center, text="Deposit", font=FONT_BUTTON,
+                  bg=COLORS["green"], fg=COLORS["white"], width=20,
                   relief="flat", cursor="hand2",
-                  command=self.do_transfer).pack(ipady=4)
+                  activebackground=COLORS["green_dark"],
+                  command=self.do_deposit).pack(ipady=4)
 
+        # חזרה
         tk.Button(center, text="Back", font=("Segoe UI", 11),
                   bg=COLORS["bg"], fg=COLORS["text_light"], relief="flat",
                   cursor="hand2", bd=0,
                   command=lambda: self.app.show_screen("user_menu")).pack(pady=(15, 0))
 
-    def do_transfer(self):
-        target = self.target_entry.get()
+    def do_deposit(self):
         text = self.amount_entry.get()
-
-        if target == "" or text == "":
-            messagebox.showerror("Error", "Please fill all fields")
-            return
-        if target == self.app.current_account.account_number:
-            messagebox.showerror("Error", "Cannot transfer to yourself")
+        if text == "":
+            messagebox.showerror("Error", "Please enter an amount")
             return
         try:
             amount = float(text)
@@ -63,7 +52,7 @@ class TransferScreen(tk.Frame):
             messagebox.showerror("Error", "Please enter a valid number")
             return
 
-        success, msg = self.app.bank.transfer(self.app.current_account, target, amount)
+        success, msg = self.app.current_account.deposit(amount)
         if not success:
             messagebox.showerror("Error", msg)
             return

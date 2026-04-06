@@ -1,59 +1,58 @@
 import datetime
 
-# המחלקה הזאת מייצגת חשבון בנק אחד
-# כל חשבון יודע את הפרטים שלו ויודע לעשות פעולות על עצמו
+
 class Account:
-    def __init__(self, account_number, name, pin, balance=0):
+    def __init__(self, account_number, name, pin, balance=0,
+                 phone="", email="", id_number="", status="active"):
         self.account_number = account_number
         self.name = name
         self.pin = pin
         self.balance = balance
-        self.is_active = True
+        self.phone = phone
+        self.email = email
+        self.id_number = id_number
+        self.status = status  # "active" / "blocked" / "pending"
         self.history = []
         self.failed_attempts = 0
-        
-            # בודק אם הקוד שהמשתמש הכניס נכון
-    # אם טעה 3 פעמים - החשבון ננעל אוטומטית
+
+    @property
+    def is_active(self):
+        return self.status == "active"
+
     def verify_pin(self, pin):
         if self.failed_attempts >= 3:
-            self.is_active = False
+            self.status = "blocked"
             return False
         if self.pin == pin:
             self.failed_attempts = 0
             return True
-        self.failed_attempts = self.failed_attempts + 1
+        self.failed_attempts += 1
         return False
-    
-#  הפקדת כסף - מחזיר שני ערכים: הצליח/נכשל + הודעה
+
     def deposit(self, amount):
         if amount <= 0:
-            return False, "Amount must be positive"
-        self.balance = self.balance + amount
+            return False, "הסכום חייב להיות חיובי"
+        self.balance += amount
         self._add_to_history("deposit", amount)
-        return True, "Deposit successful"
-    
-# משיכת כסף - בודק שיש מספיק יתרה לפני המשיכה
+        return True, f"הופקדו {amount} ₪ בהצלחה"
 
     def withdraw(self, amount):
         if amount <= 0:
-            return False, "Amount must be positive"
+            return False, "הסכום חייב להיות חיובי"
         if amount > self.balance:
-            return False, "Not enough balance"
-        self.balance = self.balance - amount
+            return False, "אין מספיק כסף בחשבון"
+        self.balance -= amount
         self._add_to_history("withdraw", amount)
-        return True, "Withdraw successful"
+        return True, f"נמשכו {amount} ₪ בהצלחה"
 
-# בדיקה שה - PIN הישן נכון -> אחכ עושה בדיקה שהוא 4 ספות .    
     def change_pin(self, old_pin, new_pin):
         if old_pin != self.pin:
-            return False, "Wrong PIN"
+            return False, "הקוד הישן שגוי"
         if len(str(new_pin)) != 4:
-            return False, "PIN must be 4 digits"
+            return False, "קוד PIN חייב להכיל 4 ספרות"
         self.pin = new_pin
-        return True, "PIN changed successfully"
-    
-    # פונקציה פנימית - מתעדת כל פעולה שקרתה בחשבון
-    # שומרת את הסוג, הסכום, התאריך, והיתרה אחרי הפעולה
+        return True, "קוד PIN שונה בהצלחה"
+
     def _add_to_history(self, action_type, amount, target=None):
         record = {
             "type": action_type,
@@ -65,78 +64,90 @@ class Account:
             record["target"] = target
         self.history.append(record)
 
-    # ממיר את כל המידע של החשבון ל-dictionary כדי שנוכל לשמור ב-JSON
     def to_dict(self):
         return {
             "account_number": self.account_number,
             "name": self.name,
             "pin": self.pin,
             "balance": self.balance,
-            "is_active": self.is_active,
+            "phone": self.phone,
+            "email": self.email,
+            "id_number": self.id_number,
+            "status": self.status,
             "history": self.history,
             "failed_attempts": self.failed_attempts
         }
 
 
-# מחלקה שמנהלת את כל החשבונות במערכת - כמו מסד נתונים
 class Bank:
     def __init__(self):
-        self.accounts = {}  # כל החשבונות נשמרים פה לפי מספר חשבון
-        self.admin_password = "admin123"  # TODO: אולי לשמור את זה ב-JSON במקום hardcoded
+        self.accounts = {}
+        self.admin_password = "admin123"
 
-    # יוצר חשבון חדש ומוסיף ל-dictionary
-    def add_account(self, account_number, name, pin, balance=0):
+    def add_account(self, account_number, name, pin, balance=0,
+                    phone="", email="", id_number="", status="active"):
         if account_number in self.accounts:
-            return False, "Account already exists"
-        new_account = Account(account_number, name, pin, balance)
+            return False, "מספר חשבון כבר קיים"
+        new_account = Account(account_number, name, pin, balance,
+                              phone, email, id_number, status)
         self.accounts[account_number] = new_account
-        return True, "Account created"
+        return True, "חשבון נוצר בהצלחה"
 
-    # מחפש חשבון לפי מספר - מחזיר None אם לא קיים
     def get_account(self, account_number):
-        if account_number in self.accounts:
-            return self.accounts[account_number]
-        return None
+        return self.accounts.get(account_number, None)
 
-    # העברה בין חשבונות - הפעולה הכי מורכבת כאן
+    def remove_account(self, account_number):
+        if account_number not in self.accounts:
+            return False, "חשבון לא נמצא"
+        del self.accounts[account_number]
+        return True, f"חשבון {account_number} נמחק"
+
     def transfer(self, from_account, to_number, amount):
         to_account = self.get_account(to_number)
         if to_account is None:
-            return False, "Target account not found"
+            return False, "חשבון היעד לא נמצא"
         if not to_account.is_active:
-            return False, "Target account is blocked"
-
-        # קודם מנסים למשוך מהשולח
+            return False, "חשבון היעד חסום"
         success, message = from_account.withdraw(amount)
         if not success:
             return False, message
-
-        # אם המשיכה עברה - מפקידים ליעד
         to_account.deposit(amount)
-        # NOTE: שומרים היסטוריה בשני הצדדים - גם שולח וגם מקבל
         from_account._add_to_history("transfer_out", amount, to_number)
         to_account._add_to_history("transfer_in", amount, from_account.account_number)
-        return True, "Transfer successful"
+        return True, f"הועברו {amount} ₪ לחשבון {to_number}"
 
-    # חסימה או שחרור חשבון - מחליף את הסטטוס
     def toggle_account(self, account_number):
         account = self.get_account(account_number)
         if account is None:
-            return False, "Account not found"
-        account.is_active = not account.is_active
-        status = "active" if account.is_active else "blocked"
-        return True, "Account is now " + status
+            return False, "חשבון לא נמצא"
+        if account.status == "active":
+            account.status = "blocked"
+        else:
+            account.status = "active"
+        return True, f"חשבון {account_number} הוא כעת {account.status}"
 
-    # מחזיר רשימה של כל החשבונות - לשימוש בפאנל מנהל
+    def approve_account(self, account_number):
+        account = self.get_account(account_number)
+        if account is None:
+            return False, "חשבון לא נמצא"
+        if account.status != "pending":
+            return False, "חשבון לא ממתין לאישור"
+        account.status = "active"
+        return True, f"חשבון {account_number} אושר בהצלחה"
+
     def get_all_accounts_info(self):
         result = []
-        for number in self.accounts:
-            account = self.accounts[number]
+        for number, account in self.accounts.items():
             result.append({
                 "number": number,
                 "name": account.name,
                 "balance": account.balance,
-                "status": "active" if account.is_active else "blocked"
+                "status": account.status,
+                "phone": account.phone,
+                "email": account.email,
+                "id_number": account.id_number
             })
         return result
 
+    def get_pending_count(self):
+        return sum(1 for a in self.accounts.values() if a.status == "pending")
