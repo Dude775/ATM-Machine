@@ -1,72 +1,75 @@
-import tkinter as tk
+import customtkinter as ctk
 from tkinter import messagebox
-from styles import COLORS, FONT_SUBTITLE, FONT_LABEL, FONT_ENTRY, FONT_BUTTON
 
-# מסך שינוי PIN
-class ChangePinScreen(tk.Frame):
+class ChangePinScreen(ctk.CTkFrame):
     def __init__(self, root, app):
-        tk.Frame.__init__(self, root, bg=COLORS["bg"])
+        super().__init__(root, fg_color="#0A0E27", corner_radius=0)
         self.app = app
 
-        center = tk.Frame(self, bg=COLORS["bg"])
-        center.place(relx=0.5, rely=0.5, anchor="center")
+        ctk.CTkLabel(self, text="Change PIN", font=("Inter", 22, "bold"),
+                     text_color="white").pack(pady=(35, 20))
 
-        tk.Label(center, text="Change PIN", font=FONT_SUBTITLE,
-                 bg=COLORS["bg"], fg=COLORS["white"]).pack(pady=(0, 5))
+        card = ctk.CTkFrame(self, fg_color="#111827", corner_radius=12)
+        card.pack(padx=50, pady=5, fill="x")
 
-        tk.Frame(center, bg=COLORS["orange"], height=3, width=150).pack(pady=(0, 20))
+        ctk.CTkLabel(card, text="Current PIN",
+                     font=("Inter", 12), text_color="#9CA3AF").pack(pady=(18, 4))
+        self.old_pin = ctk.CTkEntry(card, font=("Inter", 14), show="*",
+                                     fg_color="#1F2937", border_color="#374151",
+                                     text_color="white", height=40,
+                                     corner_radius=10, justify="center")
+        self.old_pin.pack(padx=25, pady=(0, 10), fill="x")
 
-        # PIN נוכחי
-        tk.Label(center, text="Current PIN", font=FONT_LABEL,
-                 bg=COLORS["bg"], fg=COLORS["text_light"]).pack()
-        self.old_pin = tk.Entry(center, font=FONT_ENTRY, justify="center", show="*",
-                                bg=COLORS["bg_light"], fg=COLORS["white"],
-                                insertbackground="white", relief="flat", width=22)
-        self.old_pin.pack(pady=(3, 12), ipady=5)
+        ctk.CTkLabel(card, text="New PIN",
+                     font=("Inter", 12), text_color="#9CA3AF").pack(pady=(0, 4))
+        self.new_pin = ctk.CTkEntry(card, font=("Inter", 14), show="*",
+                                     fg_color="#1F2937", border_color="#374151",
+                                     text_color="white", height=40,
+                                     corner_radius=10, justify="center")
+        self.new_pin.pack(padx=25, pady=(0, 10), fill="x")
 
-        # PIN חדש
-        tk.Label(center, text="New PIN", font=FONT_LABEL,
-                 bg=COLORS["bg"], fg=COLORS["text_light"]).pack()
-        self.new_pin = tk.Entry(center, font=FONT_ENTRY, justify="center", show="*",
-                                bg=COLORS["bg_light"], fg=COLORS["white"],
-                                insertbackground="white", relief="flat", width=22)
-        self.new_pin.pack(pady=(3, 12), ipady=5)
+        ctk.CTkLabel(card, text="Confirm new PIN",
+                     font=("Inter", 12), text_color="#9CA3AF").pack(pady=(0, 4))
+        self.confirm_pin = ctk.CTkEntry(card, font=("Inter", 14), show="*",
+                                         fg_color="#1F2937", border_color="#374151",
+                                         text_color="white", height=40,
+                                         corner_radius=10, justify="center")
+        self.confirm_pin.pack(padx=25, pady=(0, 18), fill="x")
 
-        # אימות
-        tk.Label(center, text="Confirm New PIN", font=FONT_LABEL,
-                 bg=COLORS["bg"], fg=COLORS["text_light"]).pack()
-        self.confirm_pin = tk.Entry(center, font=FONT_ENTRY, justify="center", show="*",
-                                    bg=COLORS["bg_light"], fg=COLORS["white"],
-                                    insertbackground="white", relief="flat", width=22)
-        self.confirm_pin.pack(pady=(3, 20), ipady=5)
+        ctk.CTkButton(self, text="Change PIN", font=("Inter", 14, "bold"),
+                      fg_color="#3B82F6", hover_color="#2563EB",
+                      height=44, corner_radius=10,
+                      command=self.handle_change).pack(padx=50, pady=(10, 5), fill="x")
 
-        tk.Button(center, text="Change PIN", font=FONT_BUTTON,
-                  bg=COLORS["orange"], fg=COLORS["white"], width=20,
-                  relief="flat", cursor="hand2",
-                  command=self.do_change).pack(ipady=4)
+        ctk.CTkButton(self, text="Back", font=("Inter", 12),
+                      fg_color="#374151", hover_color="#4B5563",
+                      height=38, corner_radius=10,
+                      command=lambda: self.app.show_screen("user_menu")).pack(padx=50, pady=4, fill="x")
 
-        tk.Button(center, text="Back", font=("Segoe UI", 11),
-                  bg=COLORS["bg"], fg=COLORS["text_light"], relief="flat",
-                  cursor="hand2", bd=0,
-                  command=lambda: self.app.show_screen("user_menu")).pack(pady=(15, 0))
-
-    def do_change(self):
+    def handle_change(self):
         old = self.old_pin.get()
         new = self.new_pin.get()
         confirm = self.confirm_pin.get()
 
-        if old == "" or new == "" or confirm == "":
+        if not old or not new or not confirm:
             messagebox.showerror("Error", "Please fill all fields")
             return
+
+        # בדיקת ה-PIN הישן
+        if not self.app.current_account.verify_pin(old):
+            messagebox.showerror("Error", "Current PIN is wrong")
+            return
+
         if new != confirm:
-            messagebox.showerror("Error", "New PIN does not match")
+            messagebox.showerror("Error", "New PINs do not match")
             return
 
-        success, msg = self.app.current_account.change_pin(old, new)
-        if not success:
-            messagebox.showerror("Error", msg)
+        # PIN צריך להיות לפחות 4 ספרות
+        if len(new) < 4:
+            messagebox.showerror("Error", "PIN must be at least 4 digits")
             return
 
+        self.app.current_account.change_pin(new)
         self.app.save()
-        messagebox.showinfo("Success", msg)
+        messagebox.showinfo("Success", "PIN changed successfully")
         self.app.show_screen("user_menu")

@@ -1,116 +1,57 @@
-import tkinter as tk
+import customtkinter as ctk
 from tkinter import messagebox
-from styles import COLORS, FONT_TITLE, FONT_LABEL, FONT_ENTRY, FONT_BUTTON, FONT_BUTTON_SM
 
-
-class LoginScreen(tk.Frame):
+# מסך כניסה - הראשון שרואים
+class LoginScreen(ctk.CTkFrame):
     def __init__(self, root, app):
-        tk.Frame.__init__(self, root, bg=COLORS["bg"])
+        super().__init__(root, fg_color="#0A0E27", corner_radius=0)
         self.app = app
-        self.adminwin = None
 
-        center = tk.Frame(self, bg=COLORS["bg"])
-        center.place(relx=0.5, rely=0.5, anchor="center")
+        ctk.CTkLabel(self, text="ATM Machine", font=("Inter", 28, "bold"),
+                     text_color="white").pack(pady=35)
 
-        tk.Label(
-            center,
-            text="ATM Machine",
-            font=FONT_TITLE,
-            bg=COLORS["bg"],
-            fg=COLORS["white"]
-        ).pack(pady=(0, 5))
+        # כרטיס לבן שמחזיק את הטופס
+        card = ctk.CTkFrame(self, fg_color="#111827", corner_radius=12)
+        card.pack(padx=50, pady=10, fill="x")
 
-        tk.Frame(
-            center,
-            bg=COLORS["green"],
-            height=3,
-            width=200
-        ).pack(pady=(0, 25))
+        ctk.CTkLabel(card, text="Account Number", font=("Inter", 12),
+                     text_color="#9CA3AF").pack(pady=(20, 4))
+        self.acc_entry = ctk.CTkEntry(card, font=("Inter", 14),
+                                      fg_color="#1F2937", border_color="#374151",
+                                      text_color="white", height=40,
+                                      corner_radius=10, justify="center")
+        self.acc_entry.pack(padx=30, pady=(0, 12), fill="x")
 
-        tk.Label(
-            center,
-            text="Account Number",
-            font=FONT_LABEL,
-            bg=COLORS["bg"],
-            fg=COLORS["text_light"]
-        ).pack()
+        ctk.CTkLabel(card, text="PIN", font=("Inter", 12),
+                     text_color="#9CA3AF").pack(pady=(0, 4))
+        self.pin_entry = ctk.CTkEntry(card, font=("Inter", 14), show="*",
+                                       fg_color="#1F2937", border_color="#374151",
+                                       text_color="white", height=40,
+                                       corner_radius=10, justify="center")
+        self.pin_entry.pack(padx=30, pady=(0, 20), fill="x")
 
-        self.accentry = tk.Entry(
-            center,
-            font=FONT_ENTRY,
-            justify="center",
-            bg=COLORS["bg_light"],
-            fg=COLORS["white"],
-            insertbackground="white",
-            relief="flat",
-            width=22
-        )
-        self.accentry.pack(pady=(3, 15), ipady=5)
+        ctk.CTkButton(self, text="Login", font=("Inter", 14, "bold"),
+                      fg_color="#3B82F6", hover_color="#2563EB",
+                      height=44, corner_radius=10,
+                      command=self.handle_login).pack(padx=50, pady=8, fill="x")
 
-        tk.Label(
-            center,
-            text="PIN",
-            font=FONT_LABEL,
-            bg=COLORS["bg"],
-            fg=COLORS["text_light"]
-        ).pack()
+        ctk.CTkButton(self, text="Admin Login", font=("Inter", 13),
+                      fg_color="#EF4444", hover_color="#DC2626",
+                      height=40, corner_radius=10,
+                      command=self.handle_admin_login).pack(padx=50, pady=4, fill="x")
 
-        self.pinentry = tk.Entry(
-            center,
-            font=FONT_ENTRY,
-            justify="center",
-            show="*",
-            bg=COLORS["bg_light"],
-            fg=COLORS["white"],
-            insertbackground="white",
-            relief="flat",
-            width=22
-        )
-        self.pinentry.pack(pady=(3, 25), ipady=5)
+    # NOTE: סדר הבדיקות חשוב - קודם בודקים אם קיים, אחכ חסום, אחכ PIN
+    def handle_login(self):
+        acc_number = self.acc_entry.get()
+        pin = self.pin_entry.get()
 
-        tk.Button(
-            center,
-            text="Login",
-            font=FONT_BUTTON,
-            bg=COLORS["green"],
-            fg=COLORS["white"],
-            width=20,
-            relief="flat",
-            cursor="hand2",
-            activebackground=COLORS["green_dark"],
-            activeforeground="white",
-            command=self.handlelogin
-        ).pack(pady=(0, 10), ipady=4)
-
-        tk.Button(
-            center,
-            text="Admin Panel",
-            font=FONT_BUTTON_SM,
-            bg=COLORS["bg"],
-            fg=COLORS["red"],
-            width=20,
-            relief="flat",
-            cursor="hand2",
-            bd=0,
-            activebackground=COLORS["bg"],
-            activeforeground=COLORS["red_dark"],
-            command=self.handleadminlogin
-        ).pack(pady=(5, 0))
-
-    def handlelogin(self):
-        accnumber = self.accentry.get()
-        pin = self.pinentry.get()
-
-        account = self.app.bank.get_account(accnumber)
-
+        account = self.app.bank.get_account(acc_number)
         if account is None:
             messagebox.showerror("Error", "Account not found")
             return
-
         if not account.is_active:
             messagebox.showerror("Error", "Account is blocked")
             return
-
         if not account.verify_pin(pin):
             self.app.save()
             messagebox.showerror("Error", "Wrong PIN")
@@ -119,76 +60,33 @@ class LoginScreen(tk.Frame):
         self.app.current_account = account
         self.app.show_screen("user_menu")
 
-    def handleadminlogin(self):
-        if self.adminwin is not None and self.adminwin.winfo_exists():
-            self.adminwin.lift()
-            self.adminwin.focus_force()
-            return
+    # חלון קופץ לסיסמת מנהל
+    def handle_admin_login(self):
+        self.admin_win = ctk.CTkToplevel(self.app.root)
+        self.admin_win.title("Admin Login")
+        self.admin_win.geometry("320x220")
+        self.admin_win.configure(fg_color="#0A0E27")
+        self.admin_win.grab_set()
 
-        self.adminwin = tk.Toplevel(self.app.root)
-        self.adminwin.title("Admin Login")
-        self.adminwin.geometry("300x220")
-        self.adminwin.configure(bg=COLORS["bg"])
-        self.adminwin.resizable(False, False)
-        self.adminwin.transient(self.app.root)
-        self.adminwin.protocol("WM_DELETE_WINDOW", self.close_admin_window)
+        ctk.CTkLabel(self.admin_win, text="Admin Password",
+                     font=("Inter", 13), text_color="#9CA3AF").pack(pady=(20, 6))
 
-        center = tk.Frame(self.adminwin, bg=COLORS["bg"])
-        center.place(relx=0.5, rely=0.5, anchor="center")
+        self.admin_pass_entry = ctk.CTkEntry(self.admin_win, font=("Inter", 14),
+                                              show="*", fg_color="#111827",
+                                              border_color="#374151",
+                                              text_color="white", height=40,
+                                              corner_radius=10, justify="center")
+        self.admin_pass_entry.pack(padx=30, pady=(0, 16), fill="x")
 
-        tk.Label(
-            center,
-            text="Admin Login",
-            font=("Segoe UI", 14, "bold"),
-            bg=COLORS["bg"],
-            fg=COLORS["white"]
-        ).pack(pady=(0, 15))
+        ctk.CTkButton(self.admin_win, text="Login", font=("Inter", 13),
+                      fg_color="#EF4444", hover_color="#DC2626",
+                      height=40, corner_radius=10,
+                      command=self.check_admin_password).pack(padx=30, fill="x")
 
-        tk.Label(
-            center,
-            text="Password",
-            font=FONT_LABEL,
-            bg=COLORS["bg"],
-            fg=COLORS["text_light"]
-        ).pack()
-
-        self.adminpassentry = tk.Entry(
-            center,
-            font=FONT_ENTRY,
-            justify="center",
-            show="*",
-            bg=COLORS["bg_light"],
-            fg=COLORS["white"],
-            insertbackground="white",
-            relief="flat",
-            width=20
-        )
-        self.adminpassentry.pack(pady=(3, 20), ipady=5)
-        self.adminpassentry.focus_set()
-
-        tk.Button(
-            center,
-            text="Login",
-            font=FONT_BUTTON,
-            bg=COLORS["red"],
-            fg=COLORS["white"],
-            width=18,
-            relief="flat",
-            cursor="hand2",
-            activebackground=COLORS["red_dark"],
-            command=self.checkadminpassword
-        ).pack(ipady=3)
-
-    def checkadminpassword(self):
-        password = self.adminpassentry.get()
-
+    def check_admin_password(self):
+        password = self.admin_pass_entry.get()
         if password == self.app.bank.admin_password:
-            self.close_admin_window()
+            self.admin_win.destroy()
             self.app.show_screen("admin")
         else:
             messagebox.showerror("Error", "Wrong admin password")
-
-    def close_admin_window(self):
-        if self.adminwin is not None and self.adminwin.winfo_exists():
-            self.adminwin.destroy()
-        self.adminwin = None

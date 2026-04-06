@@ -1,182 +1,254 @@
-import tkinter as tk
+import customtkinter as ctk
 from tkinter import messagebox
-from styles import COLORS, FONT_TITLE, FONT_SUBTITLE, FONT_LABEL, FONT_ENTRY, FONT_BUTTON, FONT_TEXT
 
-# פאנל מנהל
-class AdminScreen(tk.Frame):
+# פאנל מנהל - ניהול כל החשבונות
+class AdminScreen(ctk.CTkFrame):
     def __init__(self, root, app):
-        tk.Frame.__init__(self, root, bg=COLORS["bg"])
+        super().__init__(root, fg_color="#0A0E27", corner_radius=0)
         self.app = app
 
-        center = tk.Frame(self, bg=COLORS["bg"])
-        center.place(relx=0.5, rely=0.5, anchor="center")
+        ctk.CTkLabel(self, text="Admin Panel", font=("Inter", 22, "bold"),
+                     text_color="white").pack(pady=(15, 4))
 
-        tk.Label(center, text="Admin Panel", font=FONT_TITLE,
-                 bg=COLORS["bg"], fg=COLORS["white"]).pack(pady=(0, 5))
+        # סטטיסטיקות למעלה
+        stats_frame = ctk.CTkFrame(self, fg_color="#111827", corner_radius=10)
+        stats_frame.pack(padx=20, pady=8, fill="x")
 
-        tk.Frame(center, bg=COLORS["red"], height=3, width=200).pack(pady=(0, 25))
+        accounts_info = self.app.bank.get_all_accounts_info()
+        total_accounts = len(accounts_info)
+        total_balance = 0
+        blocked_count = 0
+        for acc in accounts_info:
+            total_balance = total_balance + acc["balance"]
+            if acc["status"] == "blocked":
+                blocked_count = blocked_count + 1
 
-        buttons = [
-            ("Create Account", self.show_create, COLORS["green"]),
-            ("View All Accounts", self.show_all, COLORS["bg_light"]),
-            ("Block / Unblock Account", self.show_toggle, COLORS["orange"]),
-        ]
+        stats_inner = ctk.CTkFrame(stats_frame, fg_color="transparent")
+        stats_inner.pack(pady=10)
 
-        for text, cmd, color in buttons:
-            tk.Button(center, text=text, font=FONT_BUTTON,
-                      bg=color, fg=COLORS["white"], width=25,
-                      relief="flat", cursor="hand2",
-                      command=cmd).pack(pady=5, ipady=3)
+        # שלושה מספרים בשורה
+        self.make_stat(stats_inner, "Accounts", str(total_accounts), "#3B82F6", 0)
+        self.make_stat(stats_inner, "Total $", str(int(total_balance)), "#10B981", 1)
+        self.make_stat(stats_inner, "Blocked", str(blocked_count), "#EF4444", 2)
 
-        tk.Button(center, text="Logout", font=("Segoe UI", 11),
-                  bg=COLORS["bg"], fg=COLORS["red"], width=25,
-                  relief="flat", cursor="hand2", bd=0,
-                  command=lambda: self.app.show_screen("login")).pack(pady=(20, 0))
+        # טבלת חשבונות
+        table_frame = ctk.CTkScrollableFrame(self, fg_color="#111827",
+                                              corner_radius=10, height=200)
+        table_frame.pack(padx=20, pady=5, fill="both", expand=True)
 
-    # יצירת חשבון חדש - popup
-    def show_create(self):
-        self.create_win = tk.Toplevel(self.app.root)
-        self.create_win.title("Create Account")
-        self.create_win.geometry("350x380")
-        self.create_win.configure(bg=COLORS["bg"])
-        self.create_win.resizable(False, False)
+        # כותרת טבלה
+        hdr = ctk.CTkFrame(table_frame, fg_color="#1F2937", corner_radius=6)
+        hdr.pack(fill="x", pady=(0, 4))
+        ctk.CTkLabel(hdr, text="#", font=("Inter", 10, "bold"),
+                     text_color="#9CA3AF", width=50).pack(side="left", padx=4)
+        ctk.CTkLabel(hdr, text="Name", font=("Inter", 10, "bold"),
+                     text_color="#9CA3AF", width=80).pack(side="left", padx=4)
+        ctk.CTkLabel(hdr, text="Balance", font=("Inter", 10, "bold"),
+                     text_color="#9CA3AF", width=80).pack(side="left", padx=4)
+        ctk.CTkLabel(hdr, text="Status", font=("Inter", 10, "bold"),
+                     text_color="#9CA3AF", width=70).pack(side="left", padx=4)
+        ctk.CTkLabel(hdr, text="Actions", font=("Inter", 10, "bold"),
+                     text_color="#9CA3AF", width=120).pack(side="left", padx=4)
 
-        center = tk.Frame(self.create_win, bg=COLORS["bg"])
-        center.place(relx=0.5, rely=0.5, anchor="center")
-
-        tk.Label(center, text="Create New Account",
-                 font=FONT_SUBTITLE, bg=COLORS["bg"], fg=COLORS["white"]).pack(pady=(0, 15))
-
-        tk.Label(center, text="Name", font=FONT_LABEL,
-                 bg=COLORS["bg"], fg=COLORS["text_light"]).pack()
-        self.name_entry = tk.Entry(center, font=FONT_ENTRY, justify="center",
-                                   bg=COLORS["bg_light"], fg=COLORS["white"],
-                                   insertbackground="white", relief="flat", width=20)
-        self.name_entry.pack(pady=(3, 10), ipady=4)
-
-        tk.Label(center, text="PIN (4 digits)", font=FONT_LABEL,
-                 bg=COLORS["bg"], fg=COLORS["text_light"]).pack()
-        self.pin_entry = tk.Entry(center, font=FONT_ENTRY, justify="center", show="*",
-                                  bg=COLORS["bg_light"], fg=COLORS["white"],
-                                  insertbackground="white", relief="flat", width=20)
-        self.pin_entry.pack(pady=(3, 10), ipady=4)
-
-        tk.Label(center, text="Initial Balance", font=FONT_LABEL,
-                 bg=COLORS["bg"], fg=COLORS["text_light"]).pack()
-        self.balance_entry = tk.Entry(center, font=FONT_ENTRY, justify="center",
-                                      bg=COLORS["bg_light"], fg=COLORS["white"],
-                                      insertbackground="white", relief="flat", width=20)
-        self.balance_entry.pack(pady=(3, 15), ipady=4)
-
-        tk.Button(center, text="Create", font=FONT_BUTTON,
-                  bg=COLORS["green"], fg=COLORS["white"], width=18,
-                  relief="flat", cursor="hand2",
-                  command=self.do_create).pack(ipady=3)
-
-    def do_create(self):
-        name = self.name_entry.get()
-        pin = self.pin_entry.get()
-        bal = self.balance_entry.get()
-
-        if name == "" or pin == "" or bal == "":
-            messagebox.showerror("Error", "fill all fields")
-            return
-        if len(pin) != 4:
-            messagebox.showerror("Error", "PIN must be 4 digits")
-            return
-        try:
-            balance = float(bal)
-        except:
-            messagebox.showerror("Error", "balance must be a number")
-            return
-
-        all_acc = self.app.bank.accounts
-        if len(all_acc) == 0:
-            new_num = "100"
+        # שורות חשבונות
+        if total_accounts == 0:
+            ctk.CTkLabel(table_frame, text="No accounts yet",
+                         font=("Inter", 12), text_color="#6B7280").pack(pady=20)
         else:
-            biggest = 0
-            for num in all_acc:
-                if int(num) > biggest:
-                    biggest = int(num)
-            new_num = str(biggest + 1)
+            for acc in accounts_info:
+                row = ctk.CTkFrame(table_frame, fg_color="#0A0E27", corner_radius=4)
+                row.pack(fill="x", pady=1)
 
-        success, msg = self.app.bank.add_account(new_num, name, pin, balance)
+                ctk.CTkLabel(row, text=acc["number"], font=("Inter", 10),
+                             text_color="white", width=50).pack(side="left", padx=4)
+                ctk.CTkLabel(row, text=acc["name"], font=("Inter", 10),
+                             text_color="white", width=80).pack(side="left", padx=4)
+                ctk.CTkLabel(row, text="₪" + str(acc["balance"]),
+                             font=("Inter", 10),
+                             text_color="#10B981", width=80).pack(side="left", padx=4)
+
+                # סטטוס עם צבע
+                status_color = "#10B981" if acc["status"] == "active" else "#EF4444"
+                ctk.CTkLabel(row, text=acc["status"], font=("Inter", 10),
+                             text_color=status_color, width=70).pack(side="left", padx=4)
+
+                # כפתורי פעולה
+                btn_frame = ctk.CTkFrame(row, fg_color="transparent")
+                btn_frame.pack(side="left", padx=4)
+
+                # כפתור חסימה/שחרור
+                toggle_text = "Block" if acc["status"] == "active" else "Unblock"
+                toggle_color = "#EF4444" if acc["status"] == "active" else "#10B981"
+                ctk.CTkButton(btn_frame, text=toggle_text, font=("Inter", 9),
+                              fg_color=toggle_color, width=55, height=24, corner_radius=6,
+                              command=lambda n=acc["number"]: self.do_toggle(n)).pack(side="left", padx=2)
+
+                # כפתור היסטוריה
+                ctk.CTkButton(btn_frame, text="History", font=("Inter", 9),
+                              fg_color="#374151", width=55, height=24, corner_radius=6,
+                              command=lambda n=acc["number"]: self.show_account_history(n)).pack(side="left", padx=2)
+
+        # כפתורים למטה
+        bottom = ctk.CTkFrame(self, fg_color="transparent")
+        bottom.pack(pady=8)
+
+        ctk.CTkButton(bottom, text="+ Create Account", font=("Inter", 12),
+                      fg_color="#3B82F6", hover_color="#2563EB",
+                      height=36, corner_radius=10, width=150,
+                      command=self.show_create).pack(side="left", padx=5)
+
+        ctk.CTkButton(bottom, text="Logout", font=("Inter", 12),
+                      fg_color="#EF4444", hover_color="#DC2626",
+                      height=36, corner_radius=10, width=150,
+                      command=lambda: self.app.show_screen("login")).pack(side="left", padx=5)
+
+    # עושה תיבת סטטיסטיקה אחת
+    def make_stat(self, parent, label, value, color, col):
+        box = ctk.CTkFrame(parent, fg_color="transparent")
+        box.grid(row=0, column=col, padx=20)
+        ctk.CTkLabel(box, text=value, font=("Inter", 20, "bold"),
+                     text_color=color).pack()
+        ctk.CTkLabel(box, text=label, font=("Inter", 10),
+                     text_color="#6B7280").pack()
+
+    # חסימה/שחרור ישירות מהטבלה
+    def do_toggle(self, acc_number):
+        success, msg = self.app.bank.toggle_account(acc_number)
         if not success:
             messagebox.showerror("Error", msg)
             return
-
         self.app.save()
-        messagebox.showinfo("Success", "Account created!\nnumber: " + new_num)
-        self.create_win.destroy()
+        # רענון המסך
+        self.app.show_screen("admin")
 
-    # הצגת כל החשבונות
-    def show_all(self):
-        self.all_win = tk.Toplevel(self.app.root)
-        self.all_win.title("all accounts")
-        self.all_win.geometry("480x380")
-        self.all_win.configure(bg=COLORS["bg"])
-
-        center = tk.Frame(self.all_win, bg=COLORS["bg"])
-        center.place(relx=0.5, rely=0.5, anchor="center")
-
-        tk.Label(center, text="All Accounts",
-                 font=FONT_SUBTITLE, bg=COLORS["bg"], fg=COLORS["white"]).pack(pady=(0, 10))
-
-        accounts = self.app.bank.get_all_accounts_info()
-
-        if len(accounts) == 0:
-            tk.Label(center, text="no accounts yet",
-                     font=FONT_LABEL, bg=COLORS["bg"], fg=COLORS["text_light"]).pack(pady=20)
+    # הצגת היסטוריה של חשבון ספציפי
+    def show_account_history(self, acc_number):
+        account = self.app.bank.get_account(acc_number)
+        if account is None:
+            messagebox.showerror("Error", "Account not found")
             return
 
-        text_box = tk.Text(center, font=FONT_TEXT, width=50, height=15,
-                           bg=COLORS["bg_light"], fg=COLORS["white"], relief="flat")
-        text_box.pack(pady=5)
+        win = ctk.CTkToplevel(self.app.root)
+        win.title("History - " + account.name)
+        win.geometry("450x400")
+        win.configure(fg_color="#0A0E27")
+        win.grab_set()
 
-        text_box.insert(tk.END, "  Number | Name      | Balance    | Status\n")
-        text_box.insert(tk.END, "  " + "-" * 44 + "\n")
+        ctk.CTkLabel(win, text="History: " + account.name + " (#" + acc_number + ")",
+                     font=("Inter", 14, "bold"), text_color="white").pack(pady=(15, 8))
 
-        for acc in accounts:
-            line = "  " + str(acc["number"]) + "    | " + acc["name"] + "     | " + str(acc["balance"]) + "    | " + acc["status"]
-            text_box.insert(tk.END, line + "\n")
-
-        text_box.config(state="disabled")
-
-    # חסימה / שחרור חשבון
-    def show_toggle(self):
-        self.toggle_win = tk.Toplevel(self.app.root)
-        self.toggle_win.title("Block / Unblock")
-        self.toggle_win.geometry("320x220")
-        self.toggle_win.configure(bg=COLORS["bg"])
-        self.toggle_win.resizable(False, False)
-
-        center = tk.Frame(self.toggle_win, bg=COLORS["bg"])
-        center.place(relx=0.5, rely=0.5, anchor="center")
-
-        tk.Label(center, text="Enter account number",
-                 font=FONT_LABEL, bg=COLORS["bg"], fg=COLORS["text_light"]).pack(pady=(0, 5))
-
-        self.toggle_entry = tk.Entry(center, font=FONT_ENTRY, justify="center",
-                                     bg=COLORS["bg_light"], fg=COLORS["white"],
-                                     insertbackground="white", relief="flat", width=20)
-        self.toggle_entry.pack(pady=(3, 20), ipady=5)
-
-        tk.Button(center, text="Toggle Status", font=FONT_BUTTON,
-                  bg=COLORS["orange"], fg=COLORS["white"], width=18,
-                  relief="flat", cursor="hand2",
-                  command=self.do_toggle).pack(ipady=3)
-
-    def do_toggle(self):
-        acc_num = self.toggle_entry.get()
-        if acc_num == "":
-            messagebox.showerror("Error", "Please enter account number")
+        history = account.history
+        if len(history) == 0:
+            ctk.CTkLabel(win, text="No transactions",
+                         font=("Inter", 12), text_color="#6B7280").pack(pady=30)
             return
 
-        success, msg = self.app.bank.toggle_account(acc_num)
-        if not success:
-            messagebox.showerror("Error", msg)
-            return
+        scroll = ctk.CTkScrollableFrame(win, fg_color="#111827", corner_radius=10, height=280)
+        scroll.pack(padx=15, pady=5, fill="both", expand=True)
 
-        self.app.save()
-        messagebox.showinfo("Success", msg)
-        self.toggle_win.destroy()
+        for record in reversed(history):
+            rec_type = record["type"]
+            if "deposit" in rec_type or "transfer_in" in rec_type:
+                color = "#10B981"
+                sign = "+"
+            elif "withdraw" in rec_type or "transfer_out" in rec_type:
+                color = "#EF4444"
+                sign = "-"
+            else:
+                color = "#9CA3AF"
+                sign = ""
+
+            row = ctk.CTkFrame(scroll, fg_color="#0A0E27", corner_radius=4)
+            row.pack(fill="x", pady=1)
+
+            ctk.CTkLabel(row, text=record["date"], font=("Inter", 9),
+                         text_color="#6B7280", width=110).pack(side="left", padx=4)
+
+            type_text = rec_type
+            if "target" in record:
+                type_text = type_text + " #" + str(record["target"])
+            ctk.CTkLabel(row, text=type_text, font=("Inter", 9),
+                         text_color="#9CA3AF", width=100).pack(side="left", padx=4)
+
+            ctk.CTkLabel(row, text=sign + str(record["amount"]),
+                         font=("Inter", 9, "bold"),
+                         text_color=color, width=70).pack(side="left", padx=4)
+
+            ctk.CTkLabel(row, text="₪" + str(record["balance_after"]),
+                         font=("Inter", 9),
+                         text_color="#6B7280", width=70).pack(side="left", padx=4)
+
+    # יצירת חשבון חדש
+    def show_create(self):
+        win = ctk.CTkToplevel(self.app.root)
+        win.title("Create Account")
+        win.geometry("350x380")
+        win.configure(fg_color="#0A0E27")
+        win.grab_set()
+
+        ctk.CTkLabel(win, text="Create New Account",
+                     font=("Inter", 16, "bold"), text_color="white").pack(pady=(20, 12))
+
+        ctk.CTkLabel(win, text="Name", font=("Inter", 11),
+                     text_color="#9CA3AF").pack(pady=(0, 2))
+        name_entry = ctk.CTkEntry(win, font=("Inter", 13), fg_color="#1F2937",
+                                  border_color="#374151", text_color="white",
+                                  height=38, corner_radius=10, justify="center")
+        name_entry.pack(padx=40, fill="x")
+
+        ctk.CTkLabel(win, text="PIN (4 digits)", font=("Inter", 11),
+                     text_color="#9CA3AF").pack(pady=(10, 2))
+        pin_entry = ctk.CTkEntry(win, font=("Inter", 13), show="*", fg_color="#1F2937",
+                                 border_color="#374151", text_color="white",
+                                 height=38, corner_radius=10, justify="center")
+        pin_entry.pack(padx=40, fill="x")
+
+        ctk.CTkLabel(win, text="Initial Balance", font=("Inter", 11),
+                     text_color="#9CA3AF").pack(pady=(10, 2))
+        bal_entry = ctk.CTkEntry(win, font=("Inter", 13), fg_color="#1F2937",
+                                 border_color="#374151", text_color="white",
+                                 height=38, corner_radius=10, justify="center")
+        bal_entry.pack(padx=40, fill="x")
+
+        def do_create():
+            name = name_entry.get()
+            pin = pin_entry.get()
+            bal = bal_entry.get()
+
+            if name == "" or pin == "" or bal == "":
+                messagebox.showerror("Error", "fill all fields")
+                return
+            if len(pin) != 4:
+                messagebox.showerror("Error", "PIN must be 4 digits")
+                return
+            try:
+                balance = float(bal)
+            except:
+                messagebox.showerror("Error", "balance must be a number")
+                return
+
+            all_acc = self.app.bank.accounts
+            if len(all_acc) == 0:
+                new_num = "100"
+            else:
+                biggest = 0
+                for num in all_acc:
+                    if int(num) > biggest:
+                        biggest = int(num)
+                new_num = str(biggest + 1)
+
+            success, msg = self.app.bank.add_account(new_num, name, pin, balance)
+            if not success:
+                messagebox.showerror("Error", msg)
+                return
+
+            self.app.save()
+            messagebox.showinfo("Success", "Account created!\nNumber: " + new_num)
+            win.destroy()
+            # רענון הפאנל
+            self.app.show_screen("admin")
+
+        ctk.CTkButton(win, text="Create Account", font=("Inter", 13, "bold"),
+                      fg_color="#3B82F6", hover_color="#2563EB",
+                      height=40, corner_radius=10,
+                      command=do_create).pack(padx=40, pady=(16, 0), fill="x")

@@ -1,6 +1,7 @@
-import tkinter as tk
+import customtkinter as ctk
 from app import ATMApp
 
-root = tk.Tk()
-app = ATMApp(root)
-root.mainloop()
+if __name__ == "__main__":
+    root = ctk.CTk()
+    app = ATMApp(root)
+    root.mainloop()

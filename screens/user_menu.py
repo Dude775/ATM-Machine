@@ -1,46 +1,46 @@
-import tkinter as tk
-from styles import COLORS, FONT_TITLE, FONT_SUBTITLE, FONT_BUTTON
+import customtkinter as ctk
 
-# תפריט ראשי של המשתמש
-class UserMenuScreen(tk.Frame):
+# תפריט ראשי - מציג יתרה וכפתורי פעולות
+class UserMenuScreen(ctk.CTkFrame):
     def __init__(self, root, app):
-        tk.Frame.__init__(self, root, bg=COLORS["bg"])
+        super().__init__(root, fg_color="#0A0E27", corner_radius=0)
         self.app = app
-        self.account = app.current_account
 
-        center = tk.Frame(self, bg=COLORS["bg"])
-        center.place(relx=0.5, rely=0.5, anchor="center")
+        name = self.app.current_account.name
+        balance = self.app.current_account.balance
 
-        # שם משתמש
-        tk.Label(center, text="Welcome, " + self.account.name,
-                 font=FONT_TITLE, bg=COLORS["bg"], fg=COLORS["white"]).pack(pady=(0, 5))
+        ctk.CTkLabel(self, text="Welcome, " + name, font=("Inter", 20, "bold"),
+                     text_color="white").pack(pady=(30, 4))
 
-        # קו הפרדה
-        tk.Frame(center, bg=COLORS["gold"], height=3, width=200).pack(pady=(0, 10))
+        # כרטיס יתרה
+        balance_card = ctk.CTkFrame(self, fg_color="#111827", corner_radius=12)
+        balance_card.pack(padx=50, pady=8, fill="x")
 
-        # יתרה
-        self.balance_label = tk.Label(center,
-                 text="Balance: $" + str(self.account.balance),
-                 font=FONT_SUBTITLE, bg=COLORS["bg"], fg=COLORS["green"])
-        self.balance_label.pack(pady=(0, 25))
+        ctk.CTkLabel(balance_card, text="Current Balance",
+                     font=("Inter", 11), text_color="#6B7280").pack(pady=(14, 2))
+        self.balance_label = ctk.CTkLabel(balance_card,
+                     text="₪ " + str(balance),
+                     font=("Inter", 26, "bold"), text_color="#3B82F6")
+        self.balance_label.pack(pady=(0, 14))
 
-        # כפתורים - רשימה של שם + מסך + צבע
+        # כפתורי פעולות
         buttons = [
-            ("Deposit", "deposit", COLORS["green"]),
-            ("Withdraw", "withdraw", COLORS["red"]),
-            ("Transfer", "transfer", COLORS["orange"]),
-            ("History", "history", COLORS["bg_light"]),
-            ("Change PIN", "change_pin", COLORS["bg_light"]),
+            ("Deposit",     "#3B82F6", "#2563EB", "deposit"),
+            ("Withdraw",    "#3B82F6", "#2563EB", "withdraw"),
+            ("Transfer",    "#3B82F6", "#2563EB", "transfer"),
+            ("History",     "#374151", "#4B5563", "history"),
+            ("Change PIN",  "#374151", "#4B5563", "change_pin"),
         ]
 
-        for text, screen, color in buttons:
-            tk.Button(center, text=text, font=FONT_BUTTON,
-                      bg=color, fg=COLORS["white"], width=22,
-                      relief="flat", cursor="hand2",
-                      command=lambda s=screen: self.app.show_screen(s)).pack(pady=4, ipady=3)
+        for label, color, hover, screen in buttons:
+            ctk.CTkButton(self, text=label, font=("Inter", 13),
+                          fg_color=color, hover_color=hover,
+                          height=40, corner_radius=10,
+                          command=lambda s=screen: self.app.show_screen(s)
+                          ).pack(padx=50, pady=4, fill="x")
 
-        # logout בנפרד
-        tk.Button(center, text="Logout", font=("Segoe UI", 11),
-                  bg=COLORS["bg"], fg=COLORS["red"], width=22,
-                  relief="flat", cursor="hand2", bd=0,
-                  command=self.app.logout).pack(pady=(15, 0))
+        # TODO: logout בתחתית - נראה יותר טבעי
+        ctk.CTkButton(self, text="Logout", font=("Inter", 12),
+                      fg_color="#EF4444", hover_color="#DC2626",
+                      height=38, corner_radius=10,
+                      command=self.app.logout).pack(padx=50, pady=(8, 20), fill="x")

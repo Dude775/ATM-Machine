@@ -1,55 +1,79 @@
-import tkinter as tk
-from styles import COLORS, FONT_SUBTITLE, FONT_LABEL, FONT_TEXT
+import customtkinter as ctk
+from tkinter import messagebox
 
 # מסך היסטוריית עסקאות
-class HistoryScreen(tk.Frame):
+class HistoryScreen(ctk.CTkFrame):
     def __init__(self, root, app):
-        tk.Frame.__init__(self, root, bg=COLORS["bg"])
+        super().__init__(root, fg_color="#0A0E27", corner_radius=0)
         self.app = app
         self.account = app.current_account
 
-        center = tk.Frame(self, bg=COLORS["bg"])
-        center.place(relx=0.5, rely=0.5, anchor="center")
+        ctk.CTkLabel(self, text="Transaction History", font=("Inter", 20, "bold"),
+                     text_color="white").pack(pady=(20, 4))
 
-        tk.Label(center, text="Transaction History", font=FONT_SUBTITLE,
-                 bg=COLORS["bg"], fg=COLORS["white"]).pack(pady=(0, 5))
-
-        tk.Frame(center, bg=COLORS["bg_light"], height=3, width=150).pack(pady=(0, 15))
+        ctk.CTkLabel(self, text="Account: " + self.account.account_number + " | " + self.account.name,
+                     font=("Inter", 11), text_color="#6B7280").pack(pady=(0, 10))
 
         history = self.account.history
 
         if len(history) == 0:
-            tk.Label(center, text="No transactions yet",
-                     font=FONT_LABEL, bg=COLORS["bg"], fg=COLORS["text_light"]).pack(pady=20)
+            ctk.CTkLabel(self, text="No transactions yet",
+                         font=("Inter", 13), text_color="#6B7280").pack(pady=40)
         else:
-            # תיבת טקסט עם scrollbar
-            frame = tk.Frame(center, bg=COLORS["bg"])
-            frame.pack()
+            # frame עם scroll
+            scroll_frame = ctk.CTkScrollableFrame(self, fg_color="#111827",
+                                                   corner_radius=10, height=350)
+            scroll_frame.pack(padx=20, pady=5, fill="both", expand=True)
 
-            scrollbar = tk.Scrollbar(frame)
-            scrollbar.pack(side="right", fill="y")
+            # כותרות
+            header = ctk.CTkFrame(scroll_frame, fg_color="#1F2937", corner_radius=6)
+            header.pack(fill="x", pady=(0, 4))
+            ctk.CTkLabel(header, text="Date", font=("Inter", 10, "bold"),
+                         text_color="#9CA3AF", width=120).pack(side="left", padx=5)
+            ctk.CTkLabel(header, text="Type", font=("Inter", 10, "bold"),
+                         text_color="#9CA3AF", width=90).pack(side="left", padx=5)
+            ctk.CTkLabel(header, text="Amount", font=("Inter", 10, "bold"),
+                         text_color="#9CA3AF", width=80).pack(side="left", padx=5)
+            ctk.CTkLabel(header, text="Balance", font=("Inter", 10, "bold"),
+                         text_color="#9CA3AF", width=80).pack(side="left", padx=5)
 
-            text_box = tk.Text(frame, font=FONT_TEXT, width=45, height=15,
-                               bg=COLORS["bg_light"], fg=COLORS["white"],
-                               relief="flat", yscrollcommand=scrollbar.set)
-            text_box.pack()
-            scrollbar.config(command=text_box.yview)
-
-            # כותרת
-            text_box.insert(tk.END, "  Date              | Type         | Amount\n")
-            text_box.insert(tk.END, "  " + "-" * 44 + "\n")
-
-            # עובר על כל עסקה מהאחרונה לראשונה
+            # שורות - מהאחרונה לראשונה
             for record in reversed(history):
-                line = "  " + record["date"] + " | " + record["type"] + " | " + str(record["amount"])
+                # צבע לפי סוג עסקה
+                rec_type = record["type"]
+                if "deposit" in rec_type or "transfer_in" in rec_type:
+                    color = "#10B981"
+                    sign = "+"
+                elif "withdraw" in rec_type or "transfer_out" in rec_type:
+                    color = "#EF4444"
+                    sign = "-"
+                else:
+                    color = "#9CA3AF"
+                    sign = ""
+
+                row = ctk.CTkFrame(scroll_frame, fg_color="#0A0E27", corner_radius=4, height=30)
+                row.pack(fill="x", pady=1)
+
+                ctk.CTkLabel(row, text=record["date"], font=("Inter", 10),
+                             text_color="#9CA3AF", width=120).pack(side="left", padx=5)
+
+                # סוג + חשבון יעד אם יש
+                type_text = rec_type
                 if "target" in record:
-                    line = line + " (acc " + str(record["target"]) + ")"
-                text_box.insert(tk.END, line + "\n")
+                    type_text = type_text + " #" + str(record["target"])
+                ctk.CTkLabel(row, text=type_text, font=("Inter", 10),
+                             text_color="#D1D5DB", width=90).pack(side="left", padx=5)
 
-            text_box.config(state="disabled")
+                ctk.CTkLabel(row, text=sign + str(record["amount"]),
+                             font=("Inter", 10, "bold"),
+                             text_color=color, width=80).pack(side="left", padx=5)
 
-        # חזרה
-        tk.Button(center, text="Back", font=("Segoe UI", 11),
-                  bg=COLORS["bg"], fg=COLORS["text_light"], relief="flat",
-                  cursor="hand2", bd=0,
-                  command=lambda: self.app.show_screen("user_menu")).pack(pady=(15, 0))
+                ctk.CTkLabel(row, text="₪" + str(record["balance_after"]),
+                             font=("Inter", 10),
+                             text_color="#6B7280", width=80).pack(side="left", padx=5)
+
+        # כפתור חזרה
+        ctk.CTkButton(self, text="Back", font=("Inter", 12),
+                      fg_color="#374151", hover_color="#4B5563",
+                      height=36, corner_radius=10,
+                      command=lambda: self.app.show_screen("user_menu")).pack(pady=(10, 15))

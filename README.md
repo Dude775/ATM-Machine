@@ -1,6 +1,6 @@
 # 🏧 ATM Machine — פרויקט סיום Python
 
-**מגישים:** David Rubin | [שם שותף]  
+**מגישים:** David Rubin | Daniel Yakov
 **קורס:** Python — IITC  
 **GitHub:** [קישור ל-Repo]
 
