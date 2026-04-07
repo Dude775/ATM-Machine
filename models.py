@@ -1,153 +1,217 @@
+from storage import *
+import tkinter as tk
+from tkinter import *
 import datetime
+import secrets
+import string
+from tkinter import messagebox 
+from models import *
+
+def login(id,pas):
+        with open('data.json', 'r+') as file:
+            file_data = json.load(file)
+        for account in file_data:
+            if account["id"] == id and account["pas"] == pas:
+                if account["attempt"] <= 4:
+                    account["attempt"] = 0
+                    write_json(account)
+                    return account
+                else: 
+                    write_json(account)
+                    return account
+            elif account["id"] == id and account["pas"] != pas:
+                account["attempt"] += 1
+                write_json(account)
+                return account
+            
+        else: return None
+        
 
 
-class Account:
-    def __init__(self, account_number, name, pin, balance=0,
-                 phone="", email="", id_number="", status="active"):
-        self.account_number = account_number
-        self.name = name
-        self.pin = pin
-        self.balance = balance
-        self.phone = phone
-        self.email = email
-        self.id_number = id_number
-        self.status = status  # "active" / "blocked" / "pending"
-        self.history = []
-        self.failed_attempts = 0
+        
 
-    @property
-    def is_active(self):
-        return self.status == "active"
+def cre(pin,admin,name,id):
+            pin.config(text="")
+            with open("data.json", 'r+') as file:
+                file_data = json.load(file)
+                for account in file_data:
+                    if account["id"] == id.get():
+                        return "already have accound with the same id"
+                        
+                if len(id.get()) < 6:
+                    return "id must containe 6 characters"
+                   
+                                        
+                if len(name.get()) < 4:
+                    return "name must containe 4 characters"
+                    
+                        
+                if admin.get() != "y" and admin.get() != "n":
+                    return "you must enter y/n!"
+                    
 
-    def verify_pin(self, pin):
-        if self.failed_attempts >= 3:
-            self.status = "blocked"
-            return False
-        if self.pin == pin:
-            self.failed_attempts = 0
-            return True
-        self.failed_attempts += 1
-        return False
+                if admin.get() == "y":
+                    admin_value = "true"
+                elif admin.get() == "n":
+                    admin_value = "false"
+            pas = secure_random_string()
 
-    def deposit(self, amount):
-        if amount <= 0:
-            return False, "הסכום חייב להיות חיובי"
-        self.balance += amount
-        self._add_to_history("deposit", amount)
-        return True, f"הופקדו {amount} ₪ בהצלחה"
+            new_account = {
+                "id": id.get(),
+                "pas": pas,
+                "name": name.get(),
+                "balance": 0,
+                "admin": admin_value,
+                "status": "enable",
+                "history": [],
+                "attemp": 0
+            }
 
-    def withdraw(self, amount):
-        if amount <= 0:
-            return False, "הסכום חייב להיות חיובי"
-        if amount > self.balance:
-            return False, "אין מספיק כסף בחשבון"
-        self.balance -= amount
-        self._add_to_history("withdraw", amount)
-        return True, f"נמשכו {amount} ₪ בהצלחה"
-
-    def change_pin(self, old_pin, new_pin):
-        if old_pin != self.pin:
-            return False, "הקוד הישן שגוי"
-        if len(str(new_pin)) != 4:
-            return False, "קוד PIN חייב להכיל 4 ספרות"
-        self.pin = new_pin
-        return True, "קוד PIN שונה בהצלחה"
-
-    def _add_to_history(self, action_type, amount, target=None):
-        record = {
-            "type": action_type,
-            "amount": amount,
-            "date": datetime.datetime.now().strftime("%Y-%m-%d %H:%M"),
-            "balance_after": self.balance
-        }
-        if target:
-            record["target"] = target
-        self.history.append(record)
-
-    def to_dict(self):
-        return {
-            "account_number": self.account_number,
-            "name": self.name,
-            "pin": self.pin,
-            "balance": self.balance,
-            "phone": self.phone,
-            "email": self.email,
-            "id_number": self.id_number,
-            "status": self.status,
-            "history": self.history,
-            "failed_attempts": self.failed_attempts
-        }
+            with open("data.json", 'r+') as file:
+                file_data = json.load(file)
+                write_json(new_account)
+                return "success!\nuser password: " + pas
+        
 
 
-class Bank:
-    def __init__(self):
-        self.accounts = {}
-        self.admin_password = "admin123"
+def secure_random_string(length=16):
+        alphabet = string.ascii_letters + string.digits
+        return ''.join(secrets.choice(alphabet) for _ in range(length))
 
-    def add_account(self, account_number, name, pin, balance=0,
-                    phone="", email="", id_number="", status="active"):
-        if account_number in self.accounts:
-            return False, "מספר חשבון כבר קיים"
-        new_account = Account(account_number, name, pin, balance,
-                              phone, email, id_number, status)
-        self.accounts[account_number] = new_account
-        return True, "חשבון נוצר בהצלחה"
 
-    def get_account(self, account_number):
-        return self.accounts.get(account_number, None)
+def des(name, id):
+            with open('data.json', 'r+') as file:
+                file_data = json.load(file)
+            for account in file_data:
+                if account["id"] == id.get() and account["name"] == name.get() :
+                    if account["admin"] == "false":
+                        account["status"] = "disable"
+                        write_json(account)
+                        return "Account disable!"
+                    else:
+                        return "Admin can't disable itself!!"
+                else:
+                    return "account don't found!"
 
-    def remove_account(self, account_number):
-        if account_number not in self.accounts:
-            return False, "חשבון לא נמצא"
-        del self.accounts[account_number]
-        return True, f"חשבון {account_number} נמחק"
 
-    def transfer(self, from_account, to_number, amount):
-        to_account = self.get_account(to_number)
-        if to_account is None:
-            return False, "חשבון היעד לא נמצא"
-        if not to_account.is_active:
-            return False, "חשבון היעד חסום"
-        success, message = from_account.withdraw(amount)
-        if not success:
-            return False, message
-        to_account.deposit(amount)
-        from_account._add_to_history("transfer_out", amount, to_number)
-        to_account._add_to_history("transfer_in", amount, from_account.account_number)
-        return True, f"הועברו {amount} ₪ לחשבון {to_number}"
 
-    def toggle_account(self, account_number):
-        account = self.get_account(account_number)
-        if account is None:
-            return False, "חשבון לא נמצא"
-        if account.status == "active":
-            account.status = "blocked"
-        else:
-            account.status = "active"
-        return True, f"חשבון {account_number} הוא כעת {account.status}"
+def enb(name, id):
+            found = ""
+            with open('data.json', 'r+') as file:
+                file_data = json.load(file)
+            for account in file_data:
+                if account["id"] == id.get() and account["name"] == name.get():
+                    account["status"] = "enable"
+                    write_json(account)
+                    found = "yes"
+                    return "Account enable!"
+            if found != "yes":
+                return "account don't found!"
 
-    def approve_account(self, account_number):
-        account = self.get_account(account_number)
-        if account is None:
-            return False, "חשבון לא נמצא"
-        if account.status != "pending":
-            return False, "חשבון לא ממתין לאישור"
-        account.status = "active"
-        return True, f"חשבון {account_number} אושר בהצלחה"
 
-    def get_all_accounts_info(self):
-        result = []
-        for number, account in self.accounts.items():
-            result.append({
-                "number": number,
-                "name": account.name,
-                "balance": account.balance,
-                "status": account.status,
-                "phone": account.phone,
-                "email": account.email,
-                "id_number": account.id_number
-            })
-        return result
 
-    def get_pending_count(self):
-        return sum(1 for a in self.accounts.values() if a.status == "pending")
+
+
+
+def dep(self, amount):
+            messagebox.askquestion("validation","Are you sure?")
+            try:
+                float(amount.get())
+            except ValueError:
+                return "enter only numbers please"
+            else:
+                if float(amount.get()) < 0:
+                    return "You cannot tpye negative numbers"
+                else:
+                    self.account["balance"] += float(amount.get())
+                    x = datetime.datetime.now()
+                    log = f"{x.strftime('%c')} you deposite {float(amount.get())}"
+                    self.account["history"].append(log)
+                    write_json(self.account)
+                    amount.delete(0, tk.END)
+                    return "operation success!"
+
+
+
+def wit(self, amount):
+            messagebox.askquestion("validation","Are you sure?")
+            try:
+                float(amount.get())
+            except ValueError:
+                return "enter only numbers please"
+            else:
+                if float(amount.get()) < 0:
+                    return "You cannot tpye negative numbers"
+                else:
+                    with open("data.json", 'r+') as file:
+                        file_data = json.load(file)
+                        for account in file_data:
+                            if account["id"] == self.account["id"] and account["pas"] == self.account["pas"]:
+                                if account["balance"] - float(amount.get()) < 0:
+                                    return "you dont have enough money"
+                                else:
+                                    self.account["balance"] -= float(amount.get())
+                                    x = datetime.datetime.now()
+                                    log = f"{x.strftime('%c')} you withdraw {float(amount.get())}"
+                                    self.account["history"].append(log)
+                                    write_json(self.account)
+                                    amount.delete(0, tk.END)
+                                    return "operation success!"
+
+
+def mov(self, amount, id):
+            messagebox.askquestion("validation","Are you sure?")
+            try:
+                float(amount.get())
+            except ValueError:
+                return "enter only numbers please"
+            else:
+                if float(amount.get()) < 0:
+                    return "You cannot tpye negative numbers"
+                else:
+                    with open("data.json", 'r+') as file:
+                        file_data = json.load(file)
+                        for account in file_data:
+                            if account["id"] == self.account["id"] and account["pas"] == self.account["pas"]:
+                                if account["balance"] - float(amount.get()) < 0:
+                                    return "you dont have enough money"
+                                else:
+                                    for account in file_data:
+                                        if account["id"] == id.get() and id.get() != self.account["id"] :
+                                            self.account["balance"] -= float(amount.get())
+                                            x = datetime.datetime.now()
+                                            log = f"{x.strftime('%c')} you send to account {id.get()} {float(amount.get())}"
+                                            self.account["history"].append(log)
+                                            write_json(self.account)
+
+                                            account["balance"] += float(amount.get())
+                                            log = f"{x.strftime('%c')} account {self.account['id']} send to you {float(amount.get())}"
+                                            account["history"].append(log)
+                                            write_json(account)
+
+                                            amount.delete(0, tk.END)
+                                            id.delete(0, tk.END)
+                                            return "operation success!"
+                                        else:
+                                            if id.get() == self.account["id"]:
+                                                return "you can't transfer to your account"
+                                            else:
+                                                return "account don't found!"
+
+
+def change(self, old, pas, pasv):
+            if old.get() != self.account["pas"]:
+                return "old password incorrect"
+            if pas.get() != pasv.get():
+                return "password don't match"
+            if len(pas.get()) < 8:
+                return "password must containe 8 characters"
+
+            self.account["pas"] = pas.get()
+            write_json(self.account)
+
+            old.delete(0, tk.END)
+            pas.delete(0, tk.END)
+            pasv.delete(0, tk.END)
+
+            return "operation success!"
