@@ -31,6 +31,7 @@ def login(id,pas):
         
 
 def cre(pin,admin,name,id):
+            messagebox.askquestion("validation","Are you sure?")
             pin.config(text="")
             with open("data.json", 'r+') as file:
                 file_data = json.load(file)
@@ -80,6 +81,7 @@ def secure_random_string(length=16):
 
 
 def des(name, id):
+            messagebox.askquestion("validation","Are you sure?")
             with open('data.json', 'r+') as file:
                 file_data = json.load(file)
             for account in file_data:
@@ -96,6 +98,7 @@ def des(name, id):
 
 
 def enb(name, id):
+            messagebox.askquestion("validation","Are you sure?")
             found = ""
             with open('data.json', 'r+') as file:
                 file_data = json.load(file)
@@ -200,6 +203,7 @@ def mov(self, amount, id):
 
 
 def change(self, old, pas, pasv):
+            messagebox.askquestion("validation","Are you sure?")
             if old.get() != self.account["pas"]:
                 return "old password incorrect"
             if pas.get() != pasv.get():
