@@ -27,7 +27,7 @@ class ATMApp:
         self.current_account = None  # מי שמחובר עכשיו - בהתחלה אף אחד
 
         self.root.title("ATM Machine")
-        self.root.geometry("500x650")
+        self.root.geometry("800x600")
         self.root.configure(bg=self.COLORS["bg"])
         self.root.resizable(True, True)
         self.root.minsize(400, 550)
@@ -327,7 +327,8 @@ class ATMApp:
         else:
             #print("got here")
             list_frame = tk.Frame(self.root, bg=self.COLORS["bg"])
-            list_frame.pack(fill="both", expand=True, padx=15, pady=5)
+            list_frame.pack(pady=5)
+
 
             canvas = tk.Canvas(list_frame, bg=self.COLORS["bg"], highlightthickness=0)
             scrollbar = tk.Scrollbar(list_frame, orient="vertical", command=canvas.yview)
@@ -336,13 +337,17 @@ class ATMApp:
             scroll_frame.bind("<Configure>", lambda e: canvas.configure(scrollregion=canvas.bbox("all")))
             canvas.create_window((0, 0), window=scroll_frame, anchor="nw")
             canvas.configure(yscrollcommand=scrollbar.set)
+            canvas.pack(side="left", padx=(0, 15)) 
+            scroll_frame.configure(padx=10)         
 
-            canvas.pack(side="left", fill="both", expand=True)
+
+            canvas.pack(side="left")
             scrollbar.pack(side="right", fill="y")
 
             for acc in accounts_info:
                 row = tk.Frame(scroll_frame, bg=self.COLORS["card"], pady=8, padx=10)
-                row.pack(fill="x", pady=3, padx=5)
+                row.pack(anchor="center", pady=3)
+
 
                 # account info
                 status_color = self.COLORS["success"] if acc["status"] == "active" else self.COLORS["danger"]
