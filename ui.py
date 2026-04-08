@@ -330,18 +330,16 @@ class ATMApp:
             list_frame.pack(pady=5)
 
 
-            canvas = tk.Canvas(list_frame, bg=self.COLORS["bg"], highlightthickness=0)
+            canvas = tk.Canvas(list_frame, bg=self.COLORS["bg"], highlightthickness=0,width=700)
             scrollbar = tk.Scrollbar(list_frame, orient="vertical", command=canvas.yview)
             scroll_frame = tk.Frame(canvas, bg=self.COLORS["bg"])
 
             scroll_frame.bind("<Configure>", lambda e: canvas.configure(scrollregion=canvas.bbox("all")))
             canvas.create_window((0, 0), window=scroll_frame, anchor="nw")
             canvas.configure(yscrollcommand=scrollbar.set)
-            canvas.pack(side="left", padx=(0, 15)) 
+            canvas.pack(side="left", padx=(0, 0)) 
             scroll_frame.configure(padx=10)         
 
-
-            canvas.pack(side="left")
             scrollbar.pack(side="right", fill="y")
 
             for acc in accounts_info:
