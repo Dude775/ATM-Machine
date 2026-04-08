@@ -84,6 +84,29 @@ class Account(BankEntity):
             "failed_attempts": self.failed_attempts
         }
 
+    def export_history_csv(self):
+        import csv
+        if len(self.history) == 0:
+            return False, "No transactions to export"
+        filename = "history_" + self.account_number + ".csv"
+        try:
+            file = open(filename, "w", newline="", encoding="utf-8")
+            writer = csv.writer(file)
+            writer.writerow(["Date", "Type", "Amount", "Balance After", "Target"])
+            for record in self.history:
+                target = record.get("target", "")
+                writer.writerow([
+                    record["date"],
+                    record["type"],
+                    record["amount"],
+                    record.get("balance_after", ""),
+                    target
+                ])
+            file.close()
+            return True, filename
+        except Exception as e:
+            return False, str(e)
+
 
 class Bank:
     def __init__(self):
