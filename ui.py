@@ -128,12 +128,7 @@ class ATMApp:
         tk.Button(frame, text="Login", command=self.handle_login,
                   **self._btn_style()).pack(pady=5)
 
-        # כפתור admin באדום
-        admin_style = self._btn_style()
-        admin_style["bg"] = self.COLORS["danger"]
-        admin_style["activebackground"] = "#c0392b"
-        tk.Button(frame, text="Admin", command=self.handle_admin_login,
-                  **admin_style).pack(pady=5)
+    
 
     # בודק את הפרטים שהוזנו ומחליט אם להכניס או לא
     def handle_login(self):
@@ -157,25 +152,31 @@ class ATMApp:
         self.show_user_menu()
 
     # -------- כניסת מנהל --------
-    def handle_admin_login(self):
-        self.clear_screen()
-        self.root.configure(bg=self.COLORS["bg"])
+    def handle_login(self):
+        acc_number = self.acc_entry.get()
+        pin = self.pin_entry.get()
 
-        frame = self._center_frame()
+        # --- Admin login using regular login fields ---
+        if acc_number == "admin" and pin == self.bank.admin_password:
+            self.show_admin_menu()
+            return
 
-        tk.Label(frame, text="Admin Login", font=("Segoe UI", 22, "bold"),
-                 bg=self.COLORS["bg"], fg=self.COLORS["text"]).pack(pady=(0, 20))
+        # --- Regular user login ---
+        account = self.bank.get_account(acc_number)
+        if account is None:
+            messagebox.showerror("Error", "Account not found")
+            return
+        if not account.is_active():
+            messagebox.showerror("Error", "Account is blocked")
+            return
+        if not account.verify_pin(pin):
+            save_data(self.bank)  # update failed attempts
+            messagebox.showerror("Error", "Wrong PIN")
+            return
 
-        tk.Label(frame, text="Admin Password:", font=("Segoe UI", 11),
-                 bg=self.COLORS["bg"], fg=self.COLORS["text2"]).pack(pady=(5, 2))
+        self.current_account = account
+        self.show_user_menu()
 
-        self.admin_pass_entry = tk.Entry(frame, show="*", **self._entry_style())
-        self.admin_pass_entry.pack(pady=(0, 15))
-
-        tk.Button(frame, text="Login", command=self.check_admin_password,
-                  **self._btn_style()).pack(pady=5)
-
-        self._back_btn(frame, self.show_login_screen)
 
     # בודק אם הסיסמה נכונה
     def check_admin_password(self):
