@@ -660,6 +660,7 @@ class ATMApp:
             ("Withdraw", self.show_withdraw),
             ("Transfer", self.show_transfer),
             ("History", self.show_history),
+            ("Export History", self.do_export_csv),
             ("Change PIN", self.show_change_pin),
         ]
 
@@ -816,6 +817,13 @@ class ATMApp:
     # מציג את כל הפעולות שנעשו בחשבון
     def show_history(self):
         self.show_account_history(self.current_account, self.show_user_menu)
+
+    def do_export_csv(self):
+        success, result = self.current_account.export_history_csv()
+        if not success:
+            messagebox.showerror("Error", result)
+            return
+        messagebox.showinfo("Success", "History exported to " + result)
 
     # -------- שינוי PIN --------
     def show_change_pin(self):
