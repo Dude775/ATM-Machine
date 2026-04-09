@@ -67,10 +67,10 @@ def cre(pin,admin,name,id):
                 "attemp": 0
             }
 
-            with open("data.json", 'r+') as file:
-                file_data = json.load(file)
-                write_json(new_account)
-                return "success!\nuser password: " + pas
+         
+                
+            write_json(new_account)
+            return "success!\nuser password: " + pas
         
 
 
