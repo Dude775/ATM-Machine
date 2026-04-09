@@ -3,6 +3,7 @@ import secrets
 import string
 
 
+
 class BankEntity:
     def __init__(self, name, status="active"):
         self.name = name
