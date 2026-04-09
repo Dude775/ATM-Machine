@@ -1,44 +1,157 @@
-from storage import *
+from storage import save_data
 import tkinter as tk
 from tkinter import *
-from tkinter import messagebox 
-from models import *
+from tkinter import messagebox
 
 
-class bank:
-    def __init__(self,root,upage):
+class ATMApp:
+    def __init__(self, root, bank):
+        self.root = root
+        self.bank = bank
+        self.current_account = None
+        self.logi = None
+        self.upage = None
+        self.identry = None
+        self.pasentry = None
+        self.status = None
+        self._build_login()
+
+    def _build_login(self):
+        self.logi = tk.Frame(self.root, bg="#cfe3ff")
+        self.logi.pack(fill="both", expand=True)
+        label = tk.Label(self.logi, text="======= ATM =======", fg="#003366", bg="#cfe3ff", font=("Arial", 18, "bold"))
+        label.pack(pady=20)
+        id = tk.Label(self.logi, text="Enter id", fg="#003366", bg="#cfe3ff", font=("Arial", 12))
+        id.pack(pady=8)
+        self.identry = tk.Entry(self.logi, bg="#ffffff", fg="#000000", highlightbackground="#003366", highlightcolor="#0066cc", highlightthickness=2)
+        self.identry.pack(pady=5, ipadx=12, ipady=4)
+        pas = tk.Label(self.logi, text="Enter password", fg="#003366", bg="#cfe3ff", font=("Arial", 12))
+        pas.pack(pady=8)
+        self.pasentry = tk.Entry(self.logi, show="*", bg="#ffffff", fg="#000000", highlightbackground="#003366", highlightcolor="#0066cc", highlightthickness=2)
+        self.pasentry.pack(pady=5, ipadx=12, ipady=4)
+        submit = tk.Button(self.logi, text="login", width=25, bg="#99c2ff", fg="#003366", activebackground="#80b5ff", font=("Arial", 12, "bold"), command=lambda: self._log())
+        submit.pack(pady=20, ipady=5)
+        self.status = tk.Label(self.logi, text=f"", fg="#cc0000", bg="#cfe3ff", font=("Arial", 12))
+        self.status.pack(pady=10)
+
+    def _log(self):
+        id_val = self.identry.get()
+        paswo = self.pasentry.get()
+        self.pasentry.delete(0, tk.END)
+        self.identry.delete(0, tk.END)
+
+        account = self.bank.login_user(id_val, paswo)
+
+        if account is None:
+            self._err()
+            return
+
+        save_data(self.bank)
+
+        if account.status == "disable" or account.failed_attempts >= 3:
+            self._ban()
+            return
+        if account.pin != paswo:
+            self._attemp(account)
+            return
+
+        self.current_account = account
+        self._show_user_page()
+
+    def _ban(self):
+        self.status.config(text=f"account blocked!", fg="#cc0000")
+
+    def _attemp(self, account):
+        self.status.config(text=f"wrong password!\n{3 - account.failed_attempts} more attempt", fg="#cc0000")
+
+    def _err(self):
+        self.status.config(text=f"account don't found", fg="#cc0000")
+
+    def _logut(self):
+        self.upage.destroy()
+        self.logi.pack(fill="both", expand=True)
+        self.status.config(text=f"")
+
+    def _show_user_page(self):
+        self.logi.pack_forget()
+        self.upage = tk.Frame(self.root, bg="#cfe3ff")
+        self.upage.pack(fill="both", expand=True)
+
+        name = tk.Label(self.upage, text=f"hellow {self.current_account.name}", fg="#003366", bg="#cfe3ff", font=("Arial", 16, "bold"))
+        name.pack(pady=15)
+
+        if self.current_account.admin == "true":
+
+            admin = tk.Label(self.upage, text=f"you are admin", fg="#004c99", bg="#cfe3ff", font=("Arial", 13, "bold"))
+            admin.pack(pady=10)
+
+            btn_style = {"width": 25, "bg": "#e6f0ff", "fg": "#003366", "activebackground": "#d0e4ff", "font": ("Arial", 12, "bold")}
+
+            badd = tk.Button(self.upage, text="Create account", command=lambda: AdminPanel(self.root, self.upage, self.bank).baseui("create"), **btn_style)
+            bdisable = tk.Button(self.upage, text="Disable account", command=lambda: AdminPanel(self.root, self.upage, self.bank).baseui("disable"), **btn_style)
+            benable = tk.Button(self.upage, text="Enbale account", command=lambda: AdminPanel(self.root, self.upage, self.bank).baseui("enable"), **btn_style)
+            baccounts = tk.Button(self.upage, text="Account list", command=lambda: AdminPanel(self.root, self.upage, self.bank).baseui("seeall"), **btn_style)
+            blogout = tk.Button(self.upage, text="Logout", command=self._logut, bg="#f2d07a", fg="#660000", activebackground="#ff9090", font=("Arial", 12, "bold"), width=25)
+
+            badd.pack(pady=8, ipady=5)
+            bdisable.pack(pady=8, ipady=5)
+            benable.pack(pady=8, ipady=5)
+            baccounts.pack(pady=8, ipady=5)
+            blogout.pack(pady=8, ipady=5)
+
+        else:
+
+            btn_style = {"width": 25, "bg": "#e6f0ff", "fg": "#003366", "activebackground": "#d0e4ff", "font": ("Arial", 12, "bold")}
+
+            bbalance = tk.Button(self.upage, text="Balance", command=lambda: UserPanel(self.current_account, self.root, self.upage, self.bank).baseui("balance"), **btn_style)
+            bwithdraw = tk.Button(self.upage, text="Withdraw Money", command=lambda: UserPanel(self.current_account, self.root, self.upage, self.bank).baseui("withdraw"), **btn_style)
+            bdeposite = tk.Button(self.upage, text="Deposite Money", command=lambda: UserPanel(self.current_account, self.root, self.upage, self.bank).baseui("deposite"), **btn_style)
+            bmove = tk.Button(self.upage, text="Bank Transfer", command=lambda: UserPanel(self.current_account, self.root, self.upage, self.bank).baseui("move"), **btn_style)
+            bchange = tk.Button(self.upage, text="Change Password ", command=lambda: UserPanel(self.current_account, self.root, self.upage, self.bank).baseui("changepas"), **btn_style)
+            bhistory = tk.Button(self.upage, text="History", command=lambda: UserPanel(self.current_account, self.root, self.upage, self.bank).baseui("history"), **btn_style)
+            blogout = tk.Button(self.upage, text="Logout", command=self._logut, bg="#f2d07a", fg="#660000", activebackground="#ff9090", font=("Arial", 12, "bold"), width=25)
+
+            bbalance.pack(pady=8, ipady=5)
+            bwithdraw.pack(pady=8, ipady=5)
+            bdeposite.pack(pady=8, ipady=5)
+            bmove.pack(pady=8, ipady=5)
+            bchange.pack(pady=8, ipady=5)
+            bhistory.pack(pady=8, ipady=5)
+            blogout.pack(pady=8, ipady=5)
+
+
+class AdminPanel:
+    def __init__(self, root, upage, bank):
         self.root = root
         self.upage = upage
+        self.bank = bank
 
-    def baseui(self,choose):
-        
+    def baseui(self, choose):
+
         self.upage.pack_forget()
         self.root = tk.Frame(self.root, bg="#cfe3ff")
         self.root.pack(fill="both", expand=True)
         self.root.configure(bg="#cfe3ff")
 
         if choose == "create":
-            bank.create(self)
+            AdminPanel.create(self)
         elif choose == "disable":
-            bank.disable(self)
+            AdminPanel.disable(self)
         elif choose == "enable":
-            bank.enable(self)
+            AdminPanel.enable(self)
         elif choose == "seeall":
-           bank.seeall(self)
+            AdminPanel.seeall(self)
 
-        btn_style = {"width": 25, "bg": "#e6f0ff", "fg": "#003366","activebackground": "#d0e4ff", "font": ("Arial", 12, "bold")}
-        blogout = tk.Button(self.root, text="Back", command=lambda: bank.exit(self),**btn_style)
+        btn_style = {"width": 25, "bg": "#e6f0ff", "fg": "#003366", "activebackground": "#d0e4ff", "font": ("Arial", 12, "bold")}
+        blogout = tk.Button(self.root, text="Back", command=lambda: AdminPanel.exit(self), **btn_style)
         blogout.pack(pady=8, ipady=5)
-        self.root.mainloop()   
-    
+
     def exit(self):
         self.root.destroy()
         self.upage.pack(fill="both", expand=True)
 
-
-
     def create(self):
-        
+
         tk.Label(self.root, text="======= Create New Account =======",
                 fg="#003366", bg="#cfe3ff", font=("Arial", 18, "bold")
         ).pack(pady=20)
@@ -80,7 +193,7 @@ class bank:
                 bg="#e6f0ff", fg="#003366",
                 activebackground="#d0e4ff",
                 font=("Arial", 12, "bold"),
-                command=lambda: submit() 
+                command=lambda: submit()
         ).pack(pady=20, ipady=5)
 
         status = tk.Label(self.root, text=f"",
@@ -91,18 +204,16 @@ class bank:
 
         def submit():
             messagebox.askquestion("validation","Are you sure?")
-            result = cre(admin.get(), name.get(), id.get())
+            result = self.bank.add_account(admin.get(), name.get(), id.get())
+            save_data(self.bank)
             status.config(text=result)
             id.delete(0, tk.END)
             name.delete(0, tk.END)
             admin.delete(0, tk.END)
-            
-
-        
 
 
     def disable(self):
-        
+
         tk.Label(self.root, text="======= Disable account=======",
                 fg="#003366", bg="#cfe3ff", font=("Arial", 18, "bold")
         ).pack(pady=20)
@@ -140,15 +251,15 @@ class bank:
                         fg="#cc0000", bg="#cfe3ff",
                         font=("Arial", 12))
         status.pack(pady=10)
-        
+
         def submit():
             messagebox.askquestion("validation","Are you sure?")
-            result = des(name.get(), id.get())
+            result = self.bank.toggle_account(name.get(), id.get(), "disable")
+            save_data(self.bank)
             status.config(text=result)
             id.delete(0, tk.END)
             name.delete(0, tk.END)
 
-        
 
     def enable(self):
 
@@ -192,16 +303,13 @@ class bank:
 
         def submit():
             messagebox.askquestion("validation","Are you sure?")
-            result = enb(name.get(), id.get())
+            result = self.bank.toggle_account(name.get(), id.get(), "enable")
+            save_data(self.bank)
             status.config(text=result)
             id.delete(0, tk.END)
             name.delete(0, tk.END)
 
 
-
-        
-
-        
     def seeall(self):
 
         tk.Label(self.root, text="======= Account lists=======",
@@ -215,54 +323,45 @@ class bank:
                         yscrollcommand=scrollbar.set,
                         bg="#ffffff", fg="#003366",
                         font=("Arial", 12))
-        
-        num = 1
-        with open('data.json', 'r+') as file:
-            file_data = json.load(file)
 
-        for account in file_data:
-            mylist.insert(END,
-                        f"{num}: Name = {account['name']}, ID = {account['id']}, Status = {account['status']}, Balance = {account['balance']:,}, Admin = {account['admin']}")
-            num += 1
+        for info in self.bank.get_all_accounts_info():
+            mylist.insert(END, info)
 
         mylist.pack(side=TOP, fill=BOTH, expand=True)
         scrollbar.config(command=mylist.yview)
 
 
-
-
-
-class user:
-    def __init__(self,account,root,upage):
-        self.account = account
+class UserPanel:
+    def __init__(self, account, root, upage, bank):
+        self.current_account = account
         self.root = root
         self.upage = upage
+        self.bank = bank
 
-    def baseui(self,choose):
-        
+    def baseui(self, choose):
+
         self.upage.pack_forget()
         self.root = tk.Frame(self.root, bg="#cfe3ff")
         self.root.pack(fill="both", expand=True)
         self.root.configure(bg="#cfe3ff")
 
         if choose == "balance":
-            user.Balance(self)
+            UserPanel.Balance(self)
         elif choose == "withdraw":
-            user.withdraw(self)
+            UserPanel.withdraw(self)
         elif choose == "deposite":
-            user.deposite(self)
+            UserPanel.deposite(self)
         elif choose == "move":
-            user.move(self)
+            UserPanel.move(self)
         elif choose == "changepas":
-            user.changepas(self)
+            UserPanel.changepas(self)
         elif choose == "history":
-            user.history(self)
+            UserPanel.history(self)
 
-        btn_style = {"width": 25, "bg": "#e6f0ff", "fg": "#003366","activebackground": "#d0e4ff", "font": ("Arial", 12, "bold")}
-        blogout = tk.Button(self.root, text="Back", command=lambda: user.exit(self),**btn_style)
+        btn_style = {"width": 25, "bg": "#e6f0ff", "fg": "#003366", "activebackground": "#d0e4ff", "font": ("Arial", 12, "bold")}
+        blogout = tk.Button(self.root, text="Back", command=lambda: UserPanel.exit(self), **btn_style)
         blogout.pack(pady=8, ipady=5)
-        self.root.mainloop()   
-    
+
     def exit(self):
         self.root.destroy()
         self.upage.pack(fill="both", expand=True)
@@ -274,14 +373,14 @@ class user:
                 fg="#003366", bg="#cfe3ff", font=("Arial", 18, "bold")
         ).pack(pady=20)
 
-        tk.Label(self.root, text=f"{self.account['balance']}",
+        tk.Label(self.root, text=f"{self.current_account.balance}",
                 fg="#003366", bg="#cfe3ff", font=("Arial", 16, "bold")
         ).pack(pady=10)
 
 
 
     def deposite(self):
-           
+
         tk.Label(self.root, text="======= Deposite=======",
                 fg="#003366", bg="#cfe3ff", font=("Arial", 18, "bold")
         ).pack(pady=20)
@@ -311,17 +410,14 @@ class user:
 
         def submit():
             messagebox.askquestion("validation","Are you sure?")
-            result = dep(self, amount.get())
+            result = self.current_account.deposit(amount.get())
+            save_data(self.bank)
             status.config(text=result)
             amount.delete(0, tk.END)
 
 
-       
-
-           
-
     def withdraw(self):
-    
+
         tk.Label(self.root, text="======= Withdraw =======",
                 fg="#003366", bg="#cfe3ff", font=("Arial", 18, "bold")
         ).pack(pady=20)
@@ -349,18 +445,17 @@ class user:
                         font=("Arial", 12))
         status.pack(pady=10)
 
-        
+
         def submit():
             messagebox.askquestion("validation","Are you sure?")
-            result = wit(self, amount.get())
+            result = self.current_account.withdraw(amount.get())
+            save_data(self.bank)
             status.config(text=result)
             amount.delete(0, tk.END)
 
-        
-
 
     def move(self):
-        
+
         tk.Label(self.root, text="======= Account transfer =======",
                 fg="#003366", bg="#cfe3ff", font=("Arial", 18, "bold")
         ).pack(pady=20)
@@ -401,14 +496,15 @@ class user:
 
         def submit():
             messagebox.askquestion("validation","Are you sure?")
-            result = mov(self, amount.get(), id.get())
+            result = self.bank.transfer(self.current_account, amount.get(), id.get())
+            save_data(self.bank)
             status.config(text=result)
             amount.delete(0, tk.END)
             id.delete(0, tk.END)
 
 
     def changepas(self):
-        
+
         tk.Label(self.root, text="======= Change password =======",
                 fg="#003366", bg="#cfe3ff", font=("Arial", 18, "bold")
         ).pack(pady=20)
@@ -460,7 +556,8 @@ class user:
 
         def submit():
             messagebox.askquestion("validation","Are you sure?")
-            result = change(self, old.get(), pas.get(), pasv.get())
+            result = self.current_account.change_pin(old.get(), pas.get(), pasv.get())
+            save_data(self.bank)
             status.config(text=result)
             old.delete(0, tk.END)
             pas.delete(0, tk.END)
@@ -468,7 +565,7 @@ class user:
 
 
     def history(self):
-        
+
         tk.Label(self.root, text="======= History =======",
                 fg="#003366", bg="#cfe3ff", font=("Arial", 18, "bold")
         ).pack(pady=20)
@@ -481,23 +578,10 @@ class user:
                         bg="#ffffff", fg="#003366",
                         font=("Arial", 12))
 
-        with open('data.json', 'r+') as file:
-            file_data = json.load(file)
-
-        for account in file_data:
-            if account["id"] == self.account["id"] and account["pas"] == self.account["pas"]:
-                num = 0
-                for sec in account["history"]:
-                    num += 1
-                    mylist.insert(END, f"{num}: {sec}")
+        num = 0
+        for sec in self.current_account.history:
+            num += 1
+            mylist.insert(END, f"{num}: {sec}")
 
         mylist.pack(side=TOP, fill=BOTH, expand=True)
         scrollbar.config(command=mylist.yview)
-
-       
-        
-   
-        
-
-
-
