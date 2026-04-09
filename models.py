@@ -98,6 +98,7 @@ def enb(name, id):
             for account in file_data:
                 if account["id"] == id and account["name"] == name:
                     account["status"] = "enable"
+                    account["attempt"] = 0
                     write_json(account)
                     found = "yes"
                     return "Account enable!"
