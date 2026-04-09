@@ -1,5 +1,4 @@
 from storage import *
-import tkinter as tk
 import datetime
 import secrets
 import string
@@ -28,36 +27,35 @@ def login(id,pas):
 
         
 
-def cre(pin,admin,name,id):
-            pin.config(text="")
+def cre(admin,name,id):
             with open("data.json", 'r+') as file:
                 file_data = json.load(file)
                 for account in file_data:
-                    if account["id"] == id.get():
+                    if account["id"] == id:
                         return "already have accound with the same id"
                         
-                if len(id.get()) < 6:
+                if len(id) < 6:
                     return "id must containe 6 characters"
                    
                                         
-                if len(name.get()) < 4:
+                if len(name) < 4:
                     return "name must containe 4 characters"
                     
                         
-                if admin.get() != "y" and admin.get() != "n":
+                if admin != "y" and admin != "n":
                     return "you must enter y/n!"
                     
 
-                if admin.get() == "y":
+                if admin == "y":
                     admin_value = "true"
-                elif admin.get() == "n":
+                elif admin == "n":
                     admin_value = "false"
             pas = secure_random_string()
 
             new_account = {
-                "id": id.get(),
+                "id": id,
                 "pas": pas,
-                "name": name.get(),
+                "name": name,
                 "balance": 0,
                 "admin": admin_value,
                 "status": "enable",
@@ -81,7 +79,7 @@ def des(name, id):
             with open('data.json', 'r+') as file:
                 file_data = json.load(file)
             for account in file_data:
-                if account["id"] == id.get() and account["name"] == name.get() :
+                if account["id"] == id and account["name"] == name :
                     if account["admin"] == "false":
                         account["status"] = "disable"
                         write_json(account)
@@ -98,7 +96,7 @@ def enb(name, id):
             with open('data.json', 'r+') as file:
                 file_data = json.load(file)
             for account in file_data:
-                if account["id"] == id.get() and account["name"] == name.get():
+                if account["id"] == id and account["name"] == name:
                     account["status"] = "enable"
                     write_json(account)
                     found = "yes"
@@ -113,100 +111,93 @@ def enb(name, id):
 
 def dep(self, amount):
             try:
-                float(amount.get())
+                float(amount)
             except ValueError:
                 return "enter only numbers please"
             else:
-                if float(amount.get()) < 0:
+                if float(amount) < 0:
                     return "You cannot tpye negative numbers"
                 else:
-                    self.account["balance"] += float(amount.get())
+                    self.account["balance"] += float(amount)
                     x = datetime.datetime.now()
-                    log = f"{x.strftime('%c')} you deposite {float(amount.get())}"
+                    log = f"{x.strftime('%c')} you deposite {float(amount)}"
                     self.account["history"].append(log)
                     write_json(self.account)
-                    amount.delete(0, tk.END)
                     return "operation success!"
 
 
 
 def wit(self, amount):
             try:
-                float(amount.get())
+                float(amount)
             except ValueError:
                 return "enter only numbers please"
             else:
-                if float(amount.get()) < 0:
+                if float(amount) < 0:
                     return "You cannot tpye negative numbers"
                 else:
                     with open("data.json", 'r+') as file:
                         file_data = json.load(file)
                         for account in file_data:
                             if account["id"] == self.account["id"] and account["pas"] == self.account["pas"]:
-                                if account["balance"] - float(amount.get()) < 0:
+                                if account["balance"] - float(amount) < 0:
                                     return "you dont have enough money"
                                 else:
-                                    self.account["balance"] -= float(amount.get())
+                                    self.account["balance"] -= float(amount)
                                     x = datetime.datetime.now()
-                                    log = f"{x.strftime('%c')} you withdraw {float(amount.get())}"
+                                    log = f"{x.strftime('%c')} you withdraw {float(amount)}"
                                     self.account["history"].append(log)
                                     write_json(self.account)
-                                    amount.delete(0, tk.END)
                                     return "operation success!"
 
 
 def mov(self, amount, id):
             try:
-                float(amount.get())
+                float(amount)
             except ValueError:
                 return "enter only numbers please"
             else:
-                if float(amount.get()) < 0:
+                if float(amount) < 0:
                     return "You cannot tpye negative numbers"
                 else:
                     with open("data.json", 'r+') as file:
                         file_data = json.load(file)
                         for account in file_data:
                             if account["id"] == self.account["id"] and account["pas"] == self.account["pas"]:
-                                if account["balance"] - float(amount.get()) < 0:
+                                if account["balance"] - float(amount) < 0:
                                     return "you dont have enough money"
                                 else:
                                     for account in file_data:
-                                        if account["id"] == id.get() and id.get() != self.account["id"] :
-                                            self.account["balance"] -= float(amount.get())
+                                        if account["id"] == id and id != self.account["id"] :
+                                            self.account["balance"] -= float(amount)
                                             x = datetime.datetime.now()
-                                            log = f"{x.strftime('%c')} you send to account {id.get()} {float(amount.get())}"
+                                            log = f"{x.strftime('%c')} you send to account {id} {float(amount)}"
                                             self.account["history"].append(log)
                                             write_json(self.account)
 
-                                            account["balance"] += float(amount.get())
-                                            log = f"{x.strftime('%c')} account {self.account['id']} send to you {float(amount.get())}"
+                                            account["balance"] += float(amount)
+                                            log = f"{x.strftime('%c')} account {self.account['id']} send to you {float(amount)}"
                                             account["history"].append(log)
                                             write_json(account)
 
-                                            amount.delete(0, tk.END)
-                                            id.delete(0, tk.END)
                                             return "operation success!"
                                         else:
-                                            if id.get() == self.account["id"]:
+                                            if id == self.account["id"]:
                                                 return "you can't transfer to your account"
                                             else:
                                                 return "account don't found!"
 
 
 def change(self, old, pas, pasv):
-            if old.get() != self.account["pas"]:
+            if old != self.account["pas"]:
                 return "old password incorrect"
-            if pas.get() != pasv.get():
+            if pas != pasv:
                 return "password don't match"
-            if len(pas.get()) < 8:
+            if len(pas) < 8:
                 return "password must containe 8 characters"
 
-            self.account["pas"] = pas.get()
+            self.account["pas"] = pas
             write_json(self.account)
 
-            old.delete(0, tk.END)
-            pas.delete(0, tk.END)
-            pasv.delete(0, tk.END)
 
             return "operation success!"

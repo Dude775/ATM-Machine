@@ -1,9 +1,6 @@
 from storage import *
 import tkinter as tk
 from tkinter import *
-import datetime
-import secrets
-import string
 from tkinter import messagebox 
 from models import *
 
@@ -91,14 +88,10 @@ class bank:
                         font=("Arial", 12))
         status.pack(pady=10)
 
-        pin = tk.Label(self.root, text=f"",
-                        fg="#cc0000", bg="#cfe3ff",
-                        font=("Arial", 12))
-        pin.pack(pady=10)
 
         def submit():
             messagebox.askquestion("validation","Are you sure?")
-            result = cre(pin,admin,name,id)
+            result = cre(admin.get(), name.get(), id.get())
             status.config(text=result)
             id.delete(0, tk.END)
             name.delete(0, tk.END)
@@ -150,7 +143,7 @@ class bank:
         
         def submit():
             messagebox.askquestion("validation","Are you sure?")
-            result = des(name,id)
+            result = des(name.get(), id.get())
             status.config(text=result)
             id.delete(0, tk.END)
             name.delete(0, tk.END)
@@ -199,7 +192,7 @@ class bank:
 
         def submit():
             messagebox.askquestion("validation","Are you sure?")
-            result = enb(name,id)
+            result = enb(name.get(), id.get())
             status.config(text=result)
             id.delete(0, tk.END)
             name.delete(0, tk.END)
@@ -318,7 +311,7 @@ class user:
 
         def submit():
             messagebox.askquestion("validation","Are you sure?")
-            result = dep(self, amount)
+            result = dep(self, amount.get())
             status.config(text=result)
             amount.delete(0, tk.END)
 
@@ -359,7 +352,7 @@ class user:
         
         def submit():
             messagebox.askquestion("validation","Are you sure?")
-            result = wit(self, amount)
+            result = wit(self, amount.get())
             status.config(text=result)
             amount.delete(0, tk.END)
 
@@ -408,7 +401,7 @@ class user:
 
         def submit():
             messagebox.askquestion("validation","Are you sure?")
-            result = mov(self, amount,id)
+            result = mov(self, amount.get(), id.get())
             status.config(text=result)
             amount.delete(0, tk.END)
             id.delete(0, tk.END)
@@ -467,7 +460,7 @@ class user:
 
         def submit():
             messagebox.askquestion("validation","Are you sure?")
-            result = change(self, old, pas, pasv)
+            result = change(self, old.get(), pas.get(), pasv.get())
             status.config(text=result)
             old.delete(0, tk.END)
             pas.delete(0, tk.END)
