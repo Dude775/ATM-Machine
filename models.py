@@ -1,10 +1,8 @@
 from storage import *
 import tkinter as tk
-from tkinter import *
 import datetime
 import secrets
 import string
-from tkinter import messagebox 
 from models import *
 
 def login(id,pas):
